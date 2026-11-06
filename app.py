@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v6.6 Master Pro Ultra",
+    page_title="NAREZHCHIK AI v6.7 Master Pro Ultra",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -181,7 +181,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.6 ULTRA PRO</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.7 ULTRA PRO</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -300,7 +300,6 @@ with col_center:
                 try:
                     status_box.text(f"⏳ Скачивание видео #{u_idx+1}...")
                     
-                    # Надежные опции yt-dlp с обходом 403 ошибки
                     ydl_opts = {
                         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
                         'outtmpl': input_filename,
@@ -412,7 +411,7 @@ with col_center:
             st.success(t["success"])
             st.session_state['generated_clips'] = all_generated_clips
 
-    st.markdown('</div>', unsafe_allow_html=Test := True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col_right:
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
@@ -421,7 +420,6 @@ with col_right:
     st.checkbox("💬 Авто-субтитры / плашки по центру", value=True, key="toggle_subs")
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # НОВЫЙ БЛОК: АЛГОРИТМЫ И ВИРУСНЫЕ СТРАТЕГИИ
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
     st.markdown(f'<div class="panel-title">🚀 АЛГОРИТМЫ И ПРОСМОТРЫ</div>', unsafe_allow_html=True)
     st.markdown('<div class="algo-box"><b>💡 Секрет удержания:</b> Первые 2 секунды решают всё. Нарезай самые эмоциональные моменты.</div>', unsafe_allow_html=True)
