@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v6.9 Hybrid Master",
+    page_title="NAREZHCHIK AI v7.0 Unbreakable Pipeline",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -50,9 +50,9 @@ st.markdown("""
         text-transform: uppercase;
     }
     .warning-box {
-        background-color: rgba(245, 158, 11, 0.08);
-        border-left: 3px solid #f59e0b;
-        color: #fcd34d;
+        background-color: rgba(56, 189, 248, 0.08);
+        border-left: 3px solid #38bdf8;
+        color: #e2e8f0;
         padding: 10px 14px;
         border-radius: 8px;
         font-size: 12px;
@@ -101,7 +101,9 @@ def ensure_gameplay():
         ydl_opts = {
             'format': 'bestvideo[height<=720][ext=mp4]/best[height<=720]',
             'outtmpl': gameplay_path,
-            'quiet': True
+            'quiet': True,
+            'nocheckcertificate': True,
+            'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}}
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -141,10 +143,10 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'source_title': '📥 ГИБРИДНЫЙ ИСТОЧНИК (ССЫЛКИ ИЛИ ФАЙЛЫ)',
-        'warning': '⚠️ **Совет:** Можешь вставить ссылки на YouTube ИЛИ загрузить готовые файлы ниже.',
+        'source_title': '📥 УМНЫЙ СКАНИРУЮЩИЙ КОНВЕЙЕР',
+        'warning': '⚡ **Авто-скачивание:** Вставь ссылки на YouTube — система сама обойдет защиту и скачает ролики.',
         'url_label': 'ССЫЛКИ НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
-        'file_label': 'ИЛИ ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
+        'file_label': 'РЕЗЕРВ: ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
         'clip_duration': 'ДЛИТЕЛЬНОСТЬ (СЕК)',
         'format_label': 'ФОРМАТ ВИДЕО (МАКЕТ 9:16)',
@@ -152,14 +154,14 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ ГИБРИДНЫЙ КОНВЕЙЕР',
+        'render_btn': '🚀 ЗАПУСТИТЬ АВТО-КОНВЕЙЕР',
         'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы:',
     },
     'EN': {
-        'source_title': '📥 HYBRID SOURCE (URLS OR FILES)',
-        'warning': '⚠️ **Tip:** You can paste YouTube URLs OR upload files below.',
+        'source_title': '📥 SMART AUTO-PIPELINE',
+        'warning': '⚡ **Auto-download:** Paste YouTube URLs — system will bypass restrictions automatically.',
         'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
-        'file_label': 'OR UPLOAD FILES FROM PC (.MP4)',
+        'file_label': 'BACKUP: UPLOAD FILES FROM PC (.MP4)',
         'clips_count': 'CLIPS PER VIDEO',
         'clip_duration': 'DURATION (SEC)',
         'format_label': 'VIDEO FORMAT (9:16 FRAME)',
@@ -167,7 +169,7 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START HYBRID PIPELINE',
+        'render_btn': '🚀 START AUTO PIPELINE',
         'success': '✅ Pipeline completed! All files ready below:',
     }
 }
@@ -183,7 +185,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.9 HYBRID MASTER</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.0 UNBREAKABLE</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -273,7 +275,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK HYBRID ⚡
+                NAREZHCHIK UNBREAKABLE ⚡
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -296,25 +298,30 @@ with col_center:
             all_generated_clips = []
             status_box = st.empty()
             
-            # 1. ОБРАБОТКА ССЫЛОК YOUTUBE
+            # 1. СКАНИРОВАНИЕ И СКАЧИВАНИЕ ПО ССЫЛКАМ С НЕУБИВАЕМЫМ ОБХОДОМ
             for u_idx, video_url in enumerate(urls):
                 timestamp = int(time.time())
                 input_filename = f"input_url_{u_idx}_{timestamp}.mp4"
                 
                 try:
-                    status_box.text(f"⏳ Скачивание по ссылке #{u_idx+1}...")
+                    status_box.text(f"⏳ Авто-скачивание ссылки #{u_idx+1} (Обход защиты)...")
+                    
+                    # Максимально прокачанные опции yt-dlp против блокировок 403
                     ydl_opts = {
                         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
                         'outtmpl': input_filename,
                         'quiet': True,
                         'overwrites': True,
-                        'no_check_certificate': True,
-                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+                        'nocheckcertificate': True,
+                        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
                         'http_headers': {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
                             'Accept-Language': 'en-US,en;q=0.9',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'Referer': 'https://www.youtube.com/'
                         }
                     }
+                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         ydl.download([video_url])
                     
@@ -400,9 +407,9 @@ with col_center:
                         os.remove(input_filename)
 
                 except Exception as e:
-                    st.error(f"❌ Ошибка со ссылкой #{u_idx+1}: {e}. (Можешь загрузить этот файл через кнопку ниже)")
+                    st.error(f"❌ Ошибка со ссылкой #{u_idx+1}: {e}. (Но ты всегда можешь перекинуть этот файл через кнопку ниже)")
 
-            # 2. ОБРАБОТКА ЗАГРУЖЕННЫХ ФАЙЛОВ С ПК
+            # 2. ОБРАБОТКА ФАЙЛОВ С ПК (ЕСЛИ ЗАГРУЖЕНЫ)
             if uploaded_videos:
                 for f_idx, uploaded_file in enumerate(uploaded_videos):
                     timestamp = int(time.time())
@@ -539,7 +546,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "hybrid_pro_shorts.zip"
+        zip_filename = "unbreakable_shorts.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -550,7 +557,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="hybrid_pro_pack.zip",
+                    file_name="unbreakable_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -566,7 +573,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_hybrid_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_unbreakable_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -574,8 +581,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"hybrid_short_{global_idx+1}.mp4",
+                            file_name=f"unbreakable_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_hybrid_{global_idx}"
+                            key=f"dl_btn_unbreakable_{global_idx}"
                         )
