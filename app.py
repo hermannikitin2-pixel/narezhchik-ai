@@ -4,11 +4,14 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 import os
 import time
+import zipfile
+import concurrent.futures
+import random
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v6.2 Pro Banner Factory",
-    page_icon="✂️",
+    page_title="NAREZHCHIK AI v6.4 Enterprise Factory",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -79,7 +82,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Функция для авто-скачивания геймплея в облаке, если его нет
 def ensure_gameplay():
     gameplay_path = "gameplay.mp4"
     if not os.path.exists(gameplay_path):
@@ -96,13 +98,13 @@ def ensure_gameplay():
             pass
     return gameplay_path
 
-# --- 3. STATE MANAGEMENT FOR LANGUAGE ---
+# --- 3. STATE MANAGEMENT FOR LANGUAGE & NICHE ---
 if 'lang' not in st.session_state:
     st.session_state['lang'] = 'RU'
 
 i18n = {
     'RU': {
-        'download_title': '📥 МАССОВЫЙ КОНВЕЙЕР ССЫЛОК',
+        'download_title': '📥 МАССОВЫЙ КОНВЕЙЕР ССЫЛОК (ENTERPRISE)',
         'warning': '⚠️ **Совет:** Каждую ссылку вставляй с новой строки.',
         'url_label': 'СПИСОК ССЫЛОК НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
@@ -112,11 +114,11 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ ФАБРИКУ С ИНТЕГРАЦИЕЙ БАННЕРА',
-        'success': '✅ Массовая фабрика завершила работу! Все клипы с баннером готовы:',
+        'render_btn': '🚀 ЗАПУСТИТЬ ENTERPRISE КОНВЕЙЕР',
+        'success': '✅ Enterprise фабрика успешно завершила работу! Все файлы готовы:',
     },
     'EN': {
-        'download_title': '📥 MASSIVE BATCH PIPELINE',
+        'download_title': '📥 MASSIVE BATCH PIPELINE (ENTERPRISE)',
         'warning': '⚠️ **Tip:** Put each URL on a new line.',
         'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
         'clips_count': 'CLIPS PER VIDEO',
@@ -126,23 +128,23 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START BATCH FACTORY WITH BANNER',
-        'success': '✅ Batch factory completed! All clips ready below:',
+        'render_btn': '🚀 START ENTERPRISE BATCH FACTORY',
+        'success': '✅ Enterprise factory completed! All files ready below:',
     }
 }
 
 t = i18n[st.session_state['lang']]
 
-# --- 4. TOP BRAND BAR WITH LANGUAGE SWITCHER ---
+# --- 4. TOP BRAND BAR ---
 col_logo, col_switcher = st.columns([6, 1])
 
 with col_logo:
     st.markdown("""
         <div style="display: flex; align-items: center; gap: 12px; padding: 6px 0;">
-            <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">🛡️</span>
+            <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">💎</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.2 PRO BANNER</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.4 ENTERPRISE</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -177,23 +179,17 @@ with col_left:
         ],
         index=0
     )
+    
+    niche_choice = st.selectbox(
+        "🎯 ВЫБОР НИШИ ДЛЯ АВТО-ХЭШТЕГОВ",
+        ["🎮 Гейминг / Игры", "🎙️ Подкасты / Интервью", "💰 Крипта / Финансы", "🧠 Саморазвитие / Психология"]
+    )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Слот для загрузки файла баннера
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
     st.markdown(f'<div class="panel-title">{t["banner_label"]}</div>', unsafe_allow_html=True)
-    
     banner_file = st.file_uploader("Загрузите рекламный ролик или баннер (.mp4 / .png / .jpg)", type=["mp4", "png", "jpg", "jpeg"])
-    
-    banner_mode = st.selectbox(
-        "Режим интеграции баннера",
-        [
-            "🚫 Без баннера",
-            "🛑 Пауза-стоп (Вставка ролика посреди видео)",
-            "📺 Плавающий оверлей (Нижний слой)"
-        ],
-        index=1 if banner_file else 0
-    )
+    banner_mode = st.selectbox("Режим интеграции баннера", ["🚫 Без баннера", "🛑 Пауза-стоп", "📺 Плавающий оверлей"], index=0)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_center:
@@ -229,7 +225,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK FACTORY 🛡️
+                NAREZHCHIK ENTERPRISE 💎
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -239,12 +235,10 @@ with col_center:
     if st.button(t["render_btn"]):
         urls = [u.strip() for u in raw_urls.split('\n') if u.strip()]
         if not urls:
-            st.error("❌ Введите хотя бы одну ссылку на YouTube в поле слева!")
+            st.error("❌ Введите хотя бы одну ссылку на YouTube!")
         else:
-            # Автоматическая загрузка геймплея в облаке, чтобы обходить лимит GitHub
             gameplay_path = ensure_gameplay()
 
-            # Сохраняем загруженный файл баннера локально, если он есть
             local_banner_path = None
             if banner_file is not None:
                 local_banner_path = f"temp_banner_{int(time.time())}{os.path.splitext(banner_file.name)[1]}"
@@ -252,29 +246,21 @@ with col_center:
                     f.write(banner_file.getbuffer())
 
             all_generated_clips = []
-            progress_bar = st.progress(0)
             status_box = st.empty()
-            
-            total_tasks = len(urls) * clips_count
-            current_task = 0
 
             for u_idx, video_url in enumerate(urls):
                 timestamp = int(time.time())
                 input_filename = f"input_video_{u_idx}_{timestamp}.mp4"
                 
                 try:
-                    status_box.text(f"⏳ Скачивание видео #{u_idx+1} из {len(urls)}...")
-                    
+                    status_box.text(f"⏳ Скачивание видео #{u_idx+1}...")
                     ydl_opts = {
                         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
                         'outtmpl': input_filename,
                         'quiet': True,
                         'overwrites': True,
                         'no_check_certificate': True,
-                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
-                        'http_headers': {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                        }
+                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
                     }
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         ydl.download([video_url])
@@ -283,18 +269,10 @@ with col_center:
                     total_duration = base_video.duration
                     step = max(5, int(total_duration / (clips_count + 1)))
                     
-                    for i in range(clips_count):
+                    def render_enterprise_clip(i):
                         start_t = i * step
                         end_t = min(start_t + clip_duration, total_duration)
-                        if start_t >= total_duration:
-                            break
-                            
-                        current_task += 1
-                        pct = int((current_task / total_tasks) * 100)
-                        status_box.text(f"✂️ Рендеринг с баннером: Видео #{u_idx+1} — Клип #{i+1} ({pct}%)...")
-                        progress_bar.progress(max(1, min(pct, 100)))
-                        
-                        clip_filename = f"banner_batch_{u_idx}_{timestamp}_{i+1}.mp4"
+                        clip_filename = f"enterprise_batch_{u_idx}_{timestamp}_{i+1}.mp4"
                         
                         main_clip = base_video.subclipped(start_t, end_t)
                         w, h = main_clip.size
@@ -324,38 +302,41 @@ with col_center:
                             final_subclip = final_subclip.with_audio(main_clip.audio)
                             
                         final_subclip.write_videofile(
-                            clip_filename, 
-                            codec="libx264", 
-                            audio_codec="aac", 
-                            fps=30, 
-                            preset="ultrafast",
-                            threads=4,
-                            logger=None
+                            clip_filename, codec="libx264", audio_codec="aac", fps=30, preset="ultrafast", threads=2, logger=None
                         )
-                        
                         main_clip.close()
                         final_subclip.close()
-                        all_generated_clips.append((f"Видео #{u_idx+1} | Клип #{i+1} [Custom Banner]", clip_filename))
+                        
+                        # Генерация хэштегов на основе ниши
+                        tags_map = {
+                            "🎮 Гейминг / Игры": "#shorts #gaming #roblox #obby #viral",
+                            "🎙️ Подкасты / Интервью": "#shorts #podcast #insight #mindset #viral",
+                            "💰 Крипта / Финансы": "#shorts #crypto #money #success #finance",
+                            "🧠 Саморазвитие / Психология": "#shorts #psychology #motivation #growth #fyp"
+                        }
+                        niche_tag = tags_map.get(niche_choice, "#shorts #viral #fyp")
+                        viral_text = f"🔥 Эпичный момент #{u_idx+1}_{i+1} {niche_tag}"
+                        
+                        return (f"Видео #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
+
+                    status_box.text(f"⚡ Enterprise рендеринг видео #{u_idx+1}...")
+                    
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        futures = [executor.submit(render_enterprise_clip, i) for i in range(clips_count)]
+                        for future in concurrent.futures.as_completed(futures):
+                            all_generated_clips.append(future.result())
 
                     base_video.close()
                     if os.path.exists(input_filename):
-                        try:
-                            os.remove(input_filename)
-                        except:
-                            pass
+                        os.remove(input_filename)
 
                 except Exception as e:
-                    st.error(f"❌ Ошибка на видео #{u_idx+1}: {e}")
+                    st.error(f"❌ Ошибка: {e}")
 
-            # Очищаем временный файл баннера
             if local_banner_path and os.path.exists(local_banner_path):
-                try:
-                    os.remove(local_banner_path)
-                except:
-                    pass
+                os.remove(local_banner_path)
 
-            progress_bar.progress(100)
-            status_box.text("✅ Фабрика успешно завершила работу!")
+            status_box.text("✅ Enterprise конвейер успешно завершен!")
             st.success(t["success"])
             st.session_state['generated_clips'] = all_generated_clips
 
@@ -365,6 +346,7 @@ with col_right:
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
     st.markdown(f'<div class="panel-title">🛡️ АНТИ-БАН И ОХВАТЫ</div>', unsafe_allow_html=True)
     st.checkbox("🔥 Авто-уникализация потока", value=True)
+    st.checkbox("🛡️ Рандомизация метаданных", value=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
@@ -372,17 +354,36 @@ with col_right:
     fx1, fx2 = st.columns(2)
     with fx1:
         st.checkbox("Flip (Зеркало)")
-        st.checkbox("Cinematic Grade")
+        st.checkbox("Cinematic Grade", value=True)
     with fx2:
         st.checkbox("Pulse Zoom", value=True)
         st.checkbox("Speed Ramp (+4%)")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 6. НИЖНЯЯ СЕТКА ГОТОВЫХ КЛИПОВ ---
+# --- 6. НИЖНЯЯ СЕТКА И ZIP АРХИВ ---
 if 'generated_clips' in st.session_state and st.session_state['generated_clips']:
     st.markdown("---")
-    st.markdown("### 🎬 РЕЗУЛЬТАТЫ КОНВЕЙЕРА С БАННЕРАМИ")
     
+    col_res_title, col_zip_btn = st.columns([3, 1])
+    with col_res_title:
+        st.markdown("### 🎬 РЕЗУЛЬТАТЫ ENTERPRISE КОНВЕЙЕРА")
+    with col_zip_btn:
+        zip_filename = "enterprise_viral_shorts.zip"
+        with zipfile.ZipFile(zip_filename, 'w') as zipf:
+            for _, filepath, _ in st.session_state['generated_clips']:
+                if os.path.exists(filepath):
+                    zipf.write(filepath, os.path.basename(filepath))
+        
+        if os.path.exists(zip_filename):
+            with open(zip_filename, "rb") as zf:
+                st.download_button(
+                    label="📦 Скачать всё архивом (.zip)",
+                    data=zf,
+                    file_name="enterprise_pack.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
+
     clips_list = st.session_state['generated_clips']
     cols_per_row = 4
     
@@ -390,18 +391,20 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
         row_clips = clips_list[i:i+cols_per_row]
         cols = st.columns(len(row_clips))
         
-        for idx, (title, filepath) in enumerate(row_clips):
+        for idx, (title, filepath, viral_text) in enumerate(row_clips):
             global_idx = i + idx
             with cols[idx]:
-                st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:8px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
+                st.text_input("Текст для поста", value=viral_text, key=f"text_ent_{global_idx}", label_visibility="collapsed")
+                
                 if os.path.exists(filepath):
                     st.video(filepath)
                     with open(filepath, "rb") as f:
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"banner_short_{global_idx+1}.mp4",
+                            file_name=f"enterprise_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_banner_{global_idx}"
+                            key=f"dl_btn_ent_{global_idx}"
                         )
