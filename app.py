@@ -2,7 +2,7 @@ import streamlit as st
 import yt_dlp
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from moviepy.video.io.ImageSequenceClip import ImageClip
+from moviepy.video.VideoClip import ImageClip
 import os
 import time
 import zipfile
@@ -100,7 +100,6 @@ def ensure_gameplay():
             pass
     return gameplay_path
 
-# Функция генерации красивых субтитров без ImageMagick (через Pillow)
 def make_subtitle_clip(text, duration):
     img_w, img_h = 1080, 150
     img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
@@ -114,7 +113,6 @@ def make_subtitle_clip(text, duration):
         except:
             font = ImageFont.load_default()
 
-    # Рисуем подложку полупрозрачную
     bbox = draw.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
@@ -306,7 +304,6 @@ with col_center:
                     total_duration = base_video.duration
                     step = max(5, int(total_duration / (clips_count + 1)))
                     
-                    # Чекбоксы состояния интерфейса для рендеринга
                     use_subs = st.session_state.get('toggle_subs', True)
 
                     def render_master_clip(i):
@@ -341,7 +338,6 @@ with col_center:
                             fw, fh = main_full.size
                             final_subclip = main_full.cropped(x_center=fw/2, y_center=fh/2, width=1080, height=1920)
 
-                        # Добавление субтитров, если включено
                         if use_subs:
                             sub_text_map = {
                                 "✂️ Стримы / Нарезки стримеров": "🔥 ЛУЧШИЙ МОМЕНТ СО СТРИМА!",
@@ -365,7 +361,6 @@ with col_center:
                         main_clip.close()
                         final_subclip.close()
                         
-                        # Хэштеги под нишу
                         tags_dict = {
                             "✂️ Стримы / Нарезки стримеров": "#shorts #twitch #streamer #clips #viral",
                             "🎨 Анимация / Мультклипы": "#shorts #animation #art #cartoon #fyp",
