@@ -1,4 +1,5 @@
 import streamlit as st
+import yt_dlp
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.VideoClip import ImageClip
@@ -11,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v6.8 Ultimate Drop",
+    page_title="NAREZHCHIK AI v6.9 Hybrid Master",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -49,9 +50,9 @@ st.markdown("""
         text-transform: uppercase;
     }
     .warning-box {
-        background-color: rgba(56, 189, 248, 0.08);
-        border-left: 3px solid #38bdf8;
-        color: #e2e8f0;
+        background-color: rgba(245, 158, 11, 0.08);
+        border-left: 3px solid #f59e0b;
+        color: #fcd34d;
         padding: 10px 14px;
         border-radius: 8px;
         font-size: 12px;
@@ -96,7 +97,6 @@ st.markdown("""
 def ensure_gameplay():
     gameplay_path = "gameplay.mp4"
     if not os.path.exists(gameplay_path):
-        import yt_dlp
         url = "https://www.youtube.com/watch?v=2X_22qe8XRw" 
         ydl_opts = {
             'format': 'bestvideo[height<=720][ext=mp4]/best[height<=720]',
@@ -141,9 +141,10 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'upload_title': '📥 ЗАГРУЗКА ИСХОДНЫХ ВИДЕО',
-        'warning': '⚡ **Максимальное удобство:** Просто перетащи скачанные видео сюда. Никаких ошибок и блокировок!',
-        'file_label': 'ПЕРЕТАЩИ ИЛИ ВЫБЕРИ ВИДЕО (.MP4 / .MOV)',
+        'source_title': '📥 ГИБРИДНЫЙ ИСТОЧНИК (ССЫЛКИ ИЛИ ФАЙЛЫ)',
+        'warning': '⚠️ **Совет:** Можешь вставить ссылки на YouTube ИЛИ загрузить готовые файлы ниже.',
+        'url_label': 'ССЫЛКИ НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
+        'file_label': 'ИЛИ ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
         'clip_duration': 'ДЛИТЕЛЬНОСТЬ (СЕК)',
         'format_label': 'ФОРМАТ ВИДЕО (МАКЕТ 9:16)',
@@ -151,13 +152,14 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ КОНВЕЙЕР',
+        'render_btn': '🚀 ЗАПУСТИТЬ ГИБРИДНЫЙ КОНВЕЙЕР',
         'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы:',
     },
     'EN': {
-        'upload_title': '📥 UPLOAD SOURCE VIDEOS',
-        'warning': '⚡ **Super Convenient:** Just drag & drop your source videos here. Zero errors!',
-        'file_label': 'DRAG & DROP VIDEOS (.MP4 / .MOV)',
+        'source_title': '📥 HYBRID SOURCE (URLS OR FILES)',
+        'warning': '⚠️ **Tip:** You can paste YouTube URLs OR upload files below.',
+        'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
+        'file_label': 'OR UPLOAD FILES FROM PC (.MP4)',
         'clips_count': 'CLIPS PER VIDEO',
         'clip_duration': 'DURATION (SEC)',
         'format_label': 'VIDEO FORMAT (9:16 FRAME)',
@@ -165,8 +167,8 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START BATCH FACTORY',
-        'success': '✅ Factory completed! All files ready below:',
+        'render_btn': '🚀 START HYBRID PIPELINE',
+        'success': '✅ Pipeline completed! All files ready below:',
     }
 }
 
@@ -181,7 +183,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.8 ULTIMATE DROP</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.9 HYBRID MASTER</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -197,9 +199,10 @@ col_left, col_center, col_right = st.columns([1.1, 1.4, 1.1])
 
 with col_left:
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">{t["upload_title"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="panel-title">{t["source_title"]}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="warning-box">{t["warning"]}</div>', unsafe_allow_html=True)
     
+    raw_urls = st.text_area(t["url_label"], placeholder="https://youtu.be/url1\nhttps://youtu.be/url2", height=70)
     uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
     
     cl1, cl2 = st.columns(2)
@@ -270,7 +273,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK DROP ⚡
+                NAREZHCHIK HYBRID ⚡
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -278,8 +281,9 @@ with col_center:
     st.write("")
     
     if st.button(t["render_btn"]):
-        if not uploaded_videos:
-            st.error("❌ Загрузи хотя бы одно видео для нарезки!")
+        urls = [u.strip() for u in raw_urls.split('\n') if u.strip()]
+        if not urls and not uploaded_videos:
+            st.error("❌ Введите ссылки на YouTube ИЛИ загрузите файлы с компьютера!")
         else:
             gameplay_path = ensure_gameplay()
 
@@ -291,28 +295,38 @@ with col_center:
 
             all_generated_clips = []
             status_box = st.empty()
-
-            for u_idx, uploaded_file in enumerate(uploaded_videos):
+            
+            # 1. ОБРАБОТКА ССЫЛОК YOUTUBE
+            for u_idx, video_url in enumerate(urls):
                 timestamp = int(time.time())
-                input_filename = f"input_local_{u_idx}_{timestamp}.mp4"
-                
-                # Сохраняем загруженный пользователем файл локально
-                with open(input_filename, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
+                input_filename = f"input_url_{u_idx}_{timestamp}.mp4"
                 
                 try:
-                    status_box.text(f"⏳ Обработка файла #{u_idx+1} ({uploaded_file.name})...")
+                    status_box.text(f"⏳ Скачивание по ссылке #{u_idx+1}...")
+                    ydl_opts = {
+                        'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
+                        'outtmpl': input_filename,
+                        'quiet': True,
+                        'overwrites': True,
+                        'no_check_certificate': True,
+                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+                        'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    }
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([video_url])
                     
                     base_video = VideoFileClip(input_filename)
                     total_duration = base_video.duration
                     step = max(5, int(total_duration / (clips_count + 1)))
-                    
                     use_subs = st.session_state.get('toggle_subs', True)
 
-                    def render_local_clip(i):
+                    def render_url_clip(i):
                         start_t = i * step
                         end_t = min(start_t + clip_duration, total_duration)
-                        clip_filename = f"local_batch_{u_idx}_{timestamp}_{i+1}.mp4"
+                        clip_filename = f"url_batch_{u_idx}_{timestamp}_{i+1}.mp4"
                         
                         main_clip = base_video.subclipped(start_t, end_t)
                         w, h = main_clip.size
@@ -324,7 +338,6 @@ with col_center:
                         main_clip = main_clip.cropped(x_center=mw/2, y_center=mh/2, width=target_w, height=target_h).with_position(("center", "top"))
                         
                         clips_to_composite = [main_clip]
-                        
                         if "Сплит-скрин" in layout_style and os.path.exists(gameplay_path):
                             gameplay_clip = VideoFileClip(gameplay_path).subclipped(0, main_clip.duration).without_audio()
                             gw, gh = gameplay_clip.size
@@ -333,7 +346,6 @@ with col_center:
                             gw_cur, gh_cur = gameplay_clip.size
                             gameplay_clip = gameplay_clip.cropped(x_center=gw_cur/2, y_center=gh_cur/2, width=target_w, height=target_h).with_position(("center", "bottom"))
                             clips_to_composite.append(gameplay_clip)
-                            
                             final_subclip = CompositeVideoClip(clips_to_composite, size=(1080, 1920))
                         else:
                             full_scale = max(1080 / w, 1920 / h)
@@ -375,13 +387,11 @@ with col_center:
                         }
                         niche_tags = tags_dict.get(niche_choice, "#shorts #viral #fyp")
                         viral_text = f"🔥 Момент #{u_idx+1}_{i+1} {niche_tags}"
-                        
-                        return (f"Файл #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
+                        return (f"Ссылка #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                    status_box.text(f"⚡ Рендеринг клипов для файла #{u_idx+1}...")
-                    
+                    status_box.text(f"⚡ Рендеринг по ссылке #{u_idx+1}...")
                     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                        futures = [executor.submit(render_local_clip, i) for i in range(clips_count)]
+                        futures = [executor.submit(render_url_clip, i) for i in range(clips_count)]
                         for future in concurrent.futures.as_completed(futures):
                             all_generated_clips.append(future.result())
 
@@ -390,7 +400,102 @@ with col_center:
                         os.remove(input_filename)
 
                 except Exception as e:
-                    st.error(f"❌ Ошибка в файле #{u_idx+1}: {e}")
+                    st.error(f"❌ Ошибка со ссылкой #{u_idx+1}: {e}. (Можешь загрузить этот файл через кнопку ниже)")
+
+            # 2. ОБРАБОТКА ЗАГРУЖЕННЫХ ФАЙЛОВ С ПК
+            if uploaded_videos:
+                for f_idx, uploaded_file in enumerate(uploaded_videos):
+                    timestamp = int(time.time())
+                    input_filename = f"input_local_{f_idx}_{timestamp}.mp4"
+                    
+                    with open(input_filename, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    
+                    try:
+                        status_box.text(f"⏳ Обработка файла #{f_idx+1} ({uploaded_file.name})...")
+                        base_video = VideoFileClip(input_filename)
+                        total_duration = base_video.duration
+                        step = max(5, int(total_duration / (clips_count + 1)))
+                        use_subs = st.session_state.get('toggle_subs', True)
+
+                        def render_local_clip(i):
+                            start_t = i * step
+                            end_t = min(start_t + clip_duration, total_duration)
+                            clip_filename = f"local_batch_{f_idx}_{timestamp}_{i+1}.mp4"
+                            
+                            main_clip = base_video.subclipped(start_t, end_t)
+                            w, h = main_clip.size
+                            target_w, target_h = 1080, 960
+                            
+                            scale_factor = max(target_w / w, target_h / h)
+                            main_clip = main_clip.resized(scale_factor)
+                            mw, mh = main_clip.size
+                            main_clip = main_clip.cropped(x_center=mw/2, y_center=mh/2, width=target_w, height=target_h).with_position(("center", "top"))
+                            
+                            clips_to_composite = [main_clip]
+                            if "Сплит-скрин" in layout_style and os.path.exists(gameplay_path):
+                                gameplay_clip = VideoFileClip(gameplay_path).subclipped(0, main_clip.duration).without_audio()
+                                gw, gh = gameplay_clip.size
+                                g_scale = max(target_w / gw, target_h / gh)
+                                gameplay_clip = gameplay_clip.resized(g_scale)
+                                gw_cur, gh_cur = gameplay_clip.size
+                                gameplay_clip = gameplay_clip.cropped(x_center=gw_cur/2, y_center=gh_cur/2, width=target_w, height=target_h).with_position(("center", "bottom"))
+                                clips_to_composite.append(gameplay_clip)
+                                final_subclip = CompositeVideoClip(clips_to_composite, size=(1080, 1920))
+                            else:
+                                full_scale = max(1080 / w, 1920 / h)
+                                main_full = main_clip.resized(full_scale)
+                                fw, fh = main_full.size
+                                final_subclip = main_full.cropped(x_center=fw/2, y_center=fh/2, width=1080, height=1920)
+
+                            if use_subs:
+                                sub_text_map = {
+                                    "✂️ Стримы / Нарезки стримеров": "🔥 ЛУЧШИЙ МОМЕНТ СО СТРИМА!",
+                                    "🎨 Анимация / Мультклипы": "👀 ТОПОВАЯ АНИМАЦИЯ",
+                                    "🎮 Гейминг / Игровые моменты": "⚡ ЭПИЧНЫЙ КАТЕЖ",
+                                    "🎙️ Подкасты / Интервью": "💡 ЖЕСТКАЯ БАЗА ОТ ГОСТЯ",
+                                    "💰 Крипта / Финансы / Трейдинг": "📈 КАК ПОДНЯТЬ КЭШ",
+                                    "🧠 Психология / Мотивация / Цитаты": "🧠 МЕНТАЛКА НА УРОВНЕ",
+                                    "🎬 Реакции / Развлекательный контент": "😂 ЖИЗА СМОТРЕТЬ ДО КОНЦА"
+                                }
+                                caption = sub_text_map.get(niche_choice, "🔥 СМОТРЕТЬ ДО КОНЦА #shorts")
+                                sub_clip = make_subtitle_clip(caption, final_subclip.duration)
+                                final_subclip = CompositeVideoClip([final_subclip, sub_clip], size=(1080, 1920))
+
+                            if main_clip.audio is not None:
+                                final_subclip = final_subclip.with_audio(main_clip.audio)
+                                
+                            final_subclip.write_videofile(
+                                clip_filename, codec="libx264", audio_codec="aac", fps=30, preset="ultrafast", threads=2, logger=None
+                            )
+                            main_clip.close()
+                            final_subclip.close()
+                            
+                            tags_dict = {
+                                "✂️ Стримы / Нарезки стримеров": "#shorts #twitch #streamer #clips #viral",
+                                "🎨 Анимация / Мультклипы": "#shorts #animation #art #cartoon #fyp",
+                                "🎮 Гейминг / Игровые моменты": "#shorts #gaming #gamer #roblox #viral",
+                                "🎙️ Подкасты / Интервью": "#shorts #podcast #interview #mindset #fyp",
+                                "💰 Крипта / Финансы / Трейдинг": "#shorts #crypto #money #trading #success",
+                                "🧠 Психология / Мотивация / Цитаты": "#shorts #psychology #motivation #growth #mind",
+                                "🎬 Реакции / Развлекательный контент": "#shorts #funny #reaction #viral #trending"
+                            }
+                            niche_tags = tags_dict.get(niche_choice, "#shorts #viral #fyp")
+                            viral_text = f"🔥 Момент #{f_idx+1}_{i+1} {niche_tags}"
+                            return (f"Файл #{f_idx+1} | Клип #{i+1}", clip_filename, viral_text)
+
+                        status_box.text(f"⚡ Рендеринг файла #{f_idx+1}...")
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                            futures = [executor.submit(render_local_clip, i) for i in range(clips_count)]
+                            for future in concurrent.futures.as_completed(futures):
+                                all_generated_clips.append(future.result())
+
+                        base_video.close()
+                        if os.path.exists(input_filename):
+                            os.remove(input_filename)
+
+                    except Exception as e:
+                        st.error(f"❌ Ошибка в файле #{f_idx+1}: {e}")
 
             if local_banner_path and os.path.exists(local_banner_path):
                 os.remove(local_banner_path)
@@ -434,7 +539,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "drop_pro_shorts.zip"
+        zip_filename = "hybrid_pro_shorts.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -445,7 +550,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="drop_pro_pack.zip",
+                    file_name="hybrid_pro_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -461,7 +566,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_drop_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_hybrid_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -469,8 +574,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"drop_short_{global_idx+1}.mp4",
+                            file_name=f"hybrid_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_drop_{global_idx}"
+                            key=f"dl_btn_hybrid_{global_idx}"
                         )
