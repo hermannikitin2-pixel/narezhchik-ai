@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v6.5 Master Pro",
+    page_title="NAREZHCHIK AI v6.6 Master Pro Ultra",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -57,6 +57,16 @@ st.markdown("""
         border-radius: 8px;
         font-size: 12px;
         margin-bottom: 14px;
+    }
+    .algo-box {
+        background-color: rgba(56, 189, 248, 0.08);
+        border-left: 3px solid #38bdf8;
+        color: #e2e8f0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        margin-bottom: 10px;
+        line-height: 1.4;
     }
     div.stButton > button:first-child {
         background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
@@ -131,7 +141,7 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'download_title': '📥 МАССОВЫЙ КОНВЕЙЕР (MASTER PRO)',
+        'download_title': '📥 МАССОВЫЙ КОНВЕЙЕР (ULTRA)',
         'warning': '⚠️ **Совет:** Каждую ссылку вставляй с новой строки.',
         'url_label': 'СПИСОК ССЫЛОК НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
@@ -141,11 +151,11 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ МАСТЕР-КОНВЕЙЕР',
+        'render_btn': '🚀 ЗАПУСТИТЬ ULTRA-КОНВЕЙЕР',
         'success': '✅ Конвейер успешно завершил работу! Все клипы и архивы готовы:',
     },
     'EN': {
-        'download_title': '📥 MASSIVE BATCH PIPELINE (MASTER PRO)',
+        'download_title': '📥 MASSIVE BATCH PIPELINE (ULTRA)',
         'warning': '⚠️ **Tip:** Put each URL on a new line.',
         'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
         'clips_count': 'CLIPS PER VIDEO',
@@ -155,7 +165,7 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START MASTER BATCH FACTORY',
+        'render_btn': '🚀 START ULTRA BATCH FACTORY',
         'success': '✅ Batch factory completed! All files ready below:',
     }
 }
@@ -168,10 +178,10 @@ col_logo, col_switcher = st.columns([6, 1])
 with col_logo:
     st.markdown("""
         <div style="display: flex; align-items: center; gap: 12px; padding: 6px 0;">
-            <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">🔥</span>
+            <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.5 MASTER PRO</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v6.6 ULTRA PRO</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -260,7 +270,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK MASTER PRO 🔥
+                NAREZHCHIK ULTRA ⚡
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -289,13 +299,19 @@ with col_center:
                 
                 try:
                     status_box.text(f"⏳ Скачивание видео #{u_idx+1}...")
+                    
+                    # Надежные опции yt-dlp с обходом 403 ошибки
                     ydl_opts = {
                         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
                         'outtmpl': input_filename,
                         'quiet': True,
                         'overwrites': True,
                         'no_check_certificate': True,
-                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+                        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+                        'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
                     }
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         ydl.download([video_url])
@@ -306,10 +322,10 @@ with col_center:
                     
                     use_subs = st.session_state.get('toggle_subs', True)
 
-                    def render_master_clip(i):
+                    def render_ultra_clip(i):
                         start_t = i * step
                         end_t = min(start_t + clip_duration, total_duration)
-                        clip_filename = f"master_batch_{u_idx}_{timestamp}_{i+1}.mp4"
+                        clip_filename = f"ultra_batch_{u_idx}_{timestamp}_{i+1}.mp4"
                         
                         main_clip = base_video.subclipped(start_t, end_t)
                         w, h = main_clip.size
@@ -375,10 +391,10 @@ with col_center:
                         
                         return (f"Видео #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                    status_box.text(f"⚡ Рендеринг видео #{u_idx+1} (Master Pro)...")
+                    status_box.text(f"⚡ Рендеринг видео #{u_idx+1} (Ultra Pro)...")
                     
                     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                        futures = [executor.submit(render_master_clip, i) for i in range(clips_count)]
+                        futures = [executor.submit(render_ultra_clip, i) for i in range(clips_count)]
                         for future in concurrent.futures.as_completed(futures):
                             all_generated_clips.append(future.result())
 
@@ -396,7 +412,7 @@ with col_center:
             st.success(t["success"])
             st.session_state['generated_clips'] = all_generated_clips
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=Test := True)
 
 with col_right:
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
@@ -405,6 +421,14 @@ with col_right:
     st.checkbox("💬 Авто-субтитры / плашки по центру", value=True, key="toggle_subs")
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # НОВЫЙ БЛОК: АЛГОРИТМЫ И ВИРУСНЫЕ СТРАТЕГИИ
+    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown(f'<div class="panel-title">🚀 АЛГОРИТМЫ И ПРОСМОТРЫ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="algo-box"><b>💡 Секрет удержания:</b> Первые 2 секунды решают всё. Нарезай самые эмоциональные моменты.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="algo-box"><b>📈 Как набрать 10k+:</b> Заливай от 3 до 5 роликов в день. Алгоритмам нужно время обучиться.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="algo-box"><b>🔥 Теги и заголовки:</b> Не пиши "Нарезка №1". Используйте интригующие фразы из ролика.</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
     st.markdown(f'<div class="panel-title">✨ СТУДИЙНЫЕ FX</div>', unsafe_allow_html=True)
     fx1, fx2 = st.columns(2)
@@ -424,7 +448,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "master_pro_shorts.zip"
+        zip_filename = "ultra_pro_shorts.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -435,7 +459,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="master_pro_pack.zip",
+                    file_name="ultra_pro_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -451,7 +475,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_master_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_ultra_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -459,8 +483,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"master_short_{global_idx+1}.mp4",
+                            file_name=f"ultra_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_master_{global_idx}"
+                            key=f"dl_btn_ultra_{global_idx}"
                         )
