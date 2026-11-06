@@ -9,12 +9,10 @@ import zipfile
 import concurrent.futures
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-import urllib.request
-import json
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v7.1 API Bridge",
+    page_title="NAREZHCHIK AI v7.2 Pro Cookies Edition",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -106,6 +104,8 @@ def ensure_gameplay():
             'quiet': True,
             'nocheckcertificate': True
         }
+        if os.path.exists("cookies.txt"):
+            ydl_opts['cookiefile'] = "cookies.txt"
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
@@ -113,52 +113,29 @@ def ensure_gameplay():
             pass
     return gameplay_path
 
-def download_via_bridge(video_url, output_filename):
-    """Обход блокировок через публичный публичный API-мост"""
-    try:
-        api_endpoint = f"https://co.wuk.sh/api/json"
-        payload = json.dumps({
-            "url": video_url,
-            "vQuality": "720",
-            "isAudioOnly": False
-        }).encode("utf-8")
-        
-        req = urllib.request.Request(
-            api_endpoint,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "User-Agent": "Mozilla/5.0"
-            }
-        )
-        
-        with urllib.request.urlopen(req, timeout=20) as response:
-            res_data = json.loads(response.read().decode())
-            if "url" in res_data:
-                download_link = res_data["url"]
-                urllib.request.urlretrieve(download_link, output_filename)
-                return True
-            elif "picker" in res_data and len(res_data["picker"]) > 0:
-                download_link = res_data["picker"][0]["url"]
-                urllib.request.urlretrieve(download_link, output_filename)
-                return True
-    except Exception as e:
-        print(f"Bridge error: {e}")
-    
-    # Резервный метод через прямой yt-dlp с cookies/клиентами
-    try:
-        ydl_opts = {
-            'format': 'best[ext=mp4]/best',
-            'outtmpl': output_filename,
-            'quiet': True,
-            'nocheckcertificate': True,
-            'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+def download_youtube_video(video_url, output_filename):
+    """Скачивание с автоматическим использованием cookies.txt при наличии"""
+    ydl_opts = {
+        'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
+        'outtmpl': output_filename,
+        'quiet': True,
+        'overwrites': True,
+        'nocheckcertificate': True,
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         }
+    }
+    
+    if os.path.exists("cookies.txt"):
+        ydl_opts['cookiefile'] = "cookies.txt"
+        
+    try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
         return os.path.exists(output_filename)
-    except:
+    except Exception as e:
+        print(f"YT-DLP Error: {e}")
         return False
 
 def make_subtitle_clip(text, duration):
@@ -192,8 +169,8 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'source_title': '📥 УМНЫЙ API-КОНВЕЙЕР ССЫЛОК',
-        'warning': '⚡ **Обход 403:** Вставь ссылки — шлюз автоматически скачает видео без блокировок.',
+        'source_title': '📥 ПРОФЕССИОНАЛЬНЫЙ КОНВЕЙЕР ССЫЛОК',
+        'warning': '⚡ **Авто-загрузка:** Вставь ссылки — yt-dlp скачает ролики напрямую.',
         'url_label': 'ССЫЛКИ НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
         'file_label': 'РЕЗЕРВ: ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
@@ -203,12 +180,12 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ API-КОНВЕЙЕР',
+        'render_btn': '🚀 ЗАПУСТИТЬ ПРО-КОНВЕЙЕР',
         'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы:',
     },
     'EN': {
-        'source_title': '📥 SMART API PIPELINE',
-        'warning': '⚡ **Bypass 403:** Paste URLs — gateway will download videos instantly without blocks.',
+        'source_title': '📥 PROFESSIONAL URL PIPELINE',
+        'warning': '⚡ **Auto-download:** Paste URLs — yt-dlp will download directly.',
         'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
         'file_label': 'BACKUP: UPLOAD FILES FROM PC (.MP4)',
         'clips_count': 'CLIPS PER VIDEO',
@@ -218,7 +195,7 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START API PIPELINE',
+        'render_btn': '🚀 START PRO PIPELINE',
         'success': '✅ Pipeline completed! All files ready below:',
     }
 }
@@ -234,7 +211,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.1 API BRIDGE</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.2 COOKIES EDITION</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -324,7 +301,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK API BRIDGE ⚡
+                NAREZHCHIK PRO ⚡
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -347,13 +324,13 @@ with col_center:
             all_generated_clips = []
             status_box = st.empty()
             
-            # 1. СКАЧИВАНИЕ ПО ССЫЛКАМ ЧЕРЕЗ API-ШЛЮЗ
+            # 1. СКАЧИВАНИЕ ПО ССЫЛКАМ ЧЕРЕЗ YT-DLP + COOKIES
             for u_idx, video_url in enumerate(urls):
                 timestamp = int(time.time())
                 input_filename = f"input_url_{u_idx}_{timestamp}.mp4"
                 
-                status_box.text(f"⏳ Шлюз скачивает ссылку #{u_idx+1}...")
-                success_dl = download_via_bridge(video_url, input_filename)
+                status_box.text(f"⏳ Загрузка ссылки #{u_idx+1}...")
+                success_dl = download_youtube_video(video_url, input_filename)
                 
                 if success_dl and os.path.exists(input_filename):
                     try:
@@ -441,7 +418,7 @@ with col_center:
                     except Exception as e:
                         st.error(f"❌ Ошибка рендеринга ссылки #{u_idx+1}: {e}")
                 else:
-                    st.error(f"❌ Не удалось скачать ссылку #{u_idx+1} через шлюз. (Проверь правильность ссылки)")
+                    st.error(f"❌ Не удалось скачать ссылку #{u_idx+1}. (Добавь cookies.txt в репозиторий GitHub для полного обхода блокировок)")
 
             # 2. ОБРАБОТКА ФАЙЛОВ С ПК
             if uploaded_videos:
@@ -580,7 +557,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "bridge_pro_shorts.zip"
+        zip_filename = "pro_cookies_shorts.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -591,7 +568,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="bridge_pro_pack.zip",
+                    file_name="pro_cookies_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -607,7 +584,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_bridge_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_cookies_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -615,8 +592,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"bridge_short_{global_idx+1}.mp4",
+                            file_name=f"cookies_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_bridge_{global_idx}"
+                            key=f"dl_btn_cookies_{global_idx}"
                         )
