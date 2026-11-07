@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v7.3 Smart Autopilot",
+    page_title="NAREZHCHIK AI v7.4 Ultimate Pro",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -103,21 +103,48 @@ def ensure_gameplay():
     return gameplay_path
 
 def get_channel_latest_video(channel_url):
-    """Автоматически находит последнее видео с канала без ручного поиска ссылок"""
+    """Использует cookies.txt для точного обхода блокировок и парсинга последних видео с канала"""
     ydl_opts = {
         'extract_flat': True,
         'quiet': True,
-        'playlistend': 1
+        'playlistend': 3
     }
+    if os.path.exists("cookies.txt"):
+        ydl_opts['cookiefile'] = "cookies.txt"
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(channel_url, download=False)
             if 'entries' in info and len(info['entries']) > 0:
-                vid_id = info['entries'][0]['id']
-                return f"https://www.youtube.com/watch?v={vid_id}"
-    except:
-        pass
+                for entry in info['entries']:
+                    vid_id = entry.get('id') or entry.get('url')
+                    if vid_id:
+                        if not vid_id.startswith('http'):
+                            return f"https://www.youtube.com/watch?v={vid_id}"
+                        return vid_id
+    except Exception as e:
+        print(f"Channel parse error: {e}")
     return None
+
+def download_video_with_cookies(video_url, output_filename):
+    ydl_opts = {
+        'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
+        'outtmpl': output_filename,
+        'quiet': True,
+        'overwrites': True,
+        'nocheckcertificate': True,
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}}
+    }
+    if os.path.exists("cookies.txt"):
+        ydl_opts['cookiefile'] = "cookies.txt"
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
+        return os.path.exists(output_filename)
+    except Exception as e:
+        print(f"Download error: {e}")
+        return False
 
 def make_subtitle_clip(text, duration):
     img_w, img_h = 1080, 150
@@ -150,8 +177,8 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'source_title': '⚡ АВТО-ПИЛОТ ПО НИШАМ (БЕЗ ССЫЛОК)',
-        'warning': '🎯 **Изи режим:** Выбери нишу и авторов — софт сам найдет и нарежет топовые ролики!',
+        'source_title': '⚡ АВТО-ПИЛОТ ПО НИШАМ (БЕЗ РЕКЛАМЫ)',
+        'warning': '🎯 **Анти-спам старт:** Софт автоматически пропускает первые 75 секунд роликов (интеграции/рекламу).',
         'mode_label': 'РЕЖИМ РАБОТЫ',
         'niche_preset': 'ВЫБОР КАТЕГОРИИ АВТОРОВ',
         'file_label': 'ИЛИ ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
@@ -162,12 +189,12 @@ i18n = {
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Без черных полос)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ АВТО-ПИЛОТ',
-        'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы:',
+        'render_btn': '🚀 ЗАПУСТИТЬ АВТО-ПИЛОТ БЕЗ РЕКЛАМЫ',
+        'success': '✅ Фабрика успешно завершила работу! Все клипы готовы ниже:',
     },
     'EN': {
-        'source_title': '⚡ AUTO-PILOT BY NICHE (NO URLS NEEDED)',
-        'warning': '🎯 **Easy Mode:** Select niche & creators — soft will find and cut top videos automatically!',
+        'source_title': '⚡ AUTO-PILOT BY NICHE (NO ADS)',
+        'warning': '🎯 **Anti-Ad Start:** Soft automatically skips first 75 seconds of videos.',
         'mode_label': 'OPERATION MODE',
         'niche_preset': 'CREATOR CATEGORY PRESET',
         'file_label': 'OR UPLOAD FILES FROM PC (.MP4)',
@@ -178,8 +205,8 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (No black bars)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START AUTO-PILOT',
-        'success': '✅ Pipeline completed! All files ready below:',
+        'render_btn': '🚀 START CLEAN AUTO-PILOT',
+        'success': '✅ Pipeline completed! All clips ready below:',
     }
 }
 
@@ -194,7 +221,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.3 SMART AUTOPILOT</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.4 ULTIMATE PRO</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -215,8 +242,6 @@ with col_left:
     
     input_mode = st.radio(t["mode_label"], ["🎨 Готовая ниша (Авто-поиск авторов)", "📂 Свои файлы с ПК (.mp4)"])
     
-    target_urls = []
-    
     if "Готовая ниша" in input_mode:
         preset_choice = st.selectbox(
             t["niche_preset"],
@@ -228,28 +253,26 @@ with col_left:
             ]
         )
         
-        # База каналов под авто-поиск последних видео
         channels_db = {
             "🎨 Аниматоры (Найс, Мармаж, Закатун, Добряк)": [
-                "https://www.youtube.com/@niceanimation", 
-                "https://www.youtube.com/@marmorage",
-                "https://www.youtube.com/@Zakatun",
-                "https://www.youtube.com/@Dobryak"
+                "https://www.youtube.com/@niceanimation/videos", 
+                "https://www.youtube.com/@marmorage/videos",
+                "https://www.youtube.com/@Zakatun/videos",
+                "https://www.youtube.com/@Dobryak/videos"
             ],
             "✂️ Стримеры / Реакции": [
-                "https://www.youtube.com/@KuplinovPlay",
-                "https://www.youtube.com/@Bratishkin"
+                "https://www.youtube.com/@KuplinovPlay/videos",
+                "https://www.youtube.com/@Bratishkin/videos"
             ],
             "🎙️ Подкасты и интервью": [
-                "https://www.youtube.com/@mikhailov",
-                "https://www.youtube.com/@vsparude"
+                "https://www.youtube.com/@mikhailov/videos",
+                "https://www.youtube.com/@vsparude/videos"
             ],
             "🎮 Игровые каналы": [
-                "https://www.youtube.com/@Roblox"
+                "https://www.youtube.com/@Roblox/videos"
             ]
         }
         selected_channels = channels_db.get(preset_choice, [])
-        st.info(f"📌 Включено авто-сканирование каналов для ниши: **{preset_choice.split(' ')[1]}**")
     else:
         uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
     
@@ -321,7 +344,7 @@ with col_center:
                 font-size: 20px;
                 text-shadow: 0px 2px 8px #000;
             ">
-                NAREZHCHIK AUTOPILOT ⚡
+                NAREZHCHIK ULTIMATE ⚡
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -340,11 +363,10 @@ with col_center:
         all_generated_clips = []
         status_box = st.empty()
         
-        # Собираем список видео для скачивания
         videos_to_process = []
         
         if "Готовая ниша" in input_mode:
-            status_box.text("🔎 Авто-сканирование каналов в выбранной нише...")
+            status_box.text("🔎 Сканирование авторов через cookies.txt...")
             for ch_url in selected_channels:
                 latest_vid = get_channel_latest_video(ch_url)
                 if latest_vid:
@@ -358,7 +380,7 @@ with col_center:
                     videos_to_process.append(f_name)
 
         if not videos_to_process:
-            st.error("❌ Не удалось найти видео для обработки! Выберите нишу или загрузите файлы.")
+            st.error("❌ Не удалось найти видео для нарезки! Проверьте нишу или загрузите файл.")
         else:
             for u_idx, source_item in enumerate(videos_to_process):
                 timestamp = int(time.time())
@@ -371,32 +393,28 @@ with col_center:
                         import shutil
                         shutil.copy(source_item, input_filename)
                 else:
-                    status_box.text(f"⏳ Авто-скачивание ролика #{u_idx+1}...")
-                    ydl_opts = {
-                        'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
-                        'outtmpl': input_filename,
-                        'quiet': True,
-                        'nocheckcertificate': True,
-                        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}}
-                    }
-                    try:
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                            ydl.download([source_item])
-                    except Exception as e:
-                        st.warning(f"⚠️ Пропуск ролика #{u_idx+1}: недоступен ({e})")
+                    status_box.text(f"⏳ Скачивание ролика #{u_idx+1}...")
+                    success = download_video_with_cookies(source_item, input_filename)
+                    if not success:
+                        st.warning(f"⚠️ Пропуск ролика #{u_idx+1}: заблокирован или недоступен.")
                         continue
 
                 if os.path.exists(input_filename):
                     try:
                         base_video = VideoFileClip(input_filename)
                         total_duration = base_video.duration
-                        step = max(5, int(total_duration / (clips_count + 1)))
+                        
+                        # АНТИ-РЕКЛАМНЫЙ СТАРТ: пропускаем первые 75 секунд (интеграции/танчики), если видео длиннее
+                        start_offset = 75 if total_duration > 120 else 0
+                        effective_duration = total_duration - start_offset
+                        
+                        step = max(5, int(effective_duration / (clips_count + 1)))
                         use_subs = st.session_state.get('toggle_subs', True)
 
                         def render_clip(i):
-                            start_t = i * step
+                            start_t = start_offset + (i * step)
                             end_t = min(start_t + clip_duration, total_duration)
-                            clip_filename = f"autopilot_{u_idx}_{timestamp}_{i+1}.mp4"
+                            clip_filename = f"ultimate_{u_idx}_{timestamp}_{i+1}.mp4"
                             
                             main_clip = base_video.subclipped(start_t, end_t)
                             w, h = main_clip.size
@@ -456,10 +474,10 @@ with col_center:
                                 "🎬 Реакции / Развлекательный контент": "#shorts #funny #reaction #viral #trending"
                             }
                             niche_tags = tags_dict.get(niche_choice, "#shorts #viral #fyp")
-                            viral_text = f"🔥 Авто-момент #{u_idx+1}_{i+1} {niche_tags}"
+                            viral_text = f"🔥 Топ-момент #{u_idx+1}_{i+1} {niche_tags}"
                             return (f"Ролик #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                        status_box.text(f"⚡ Рендеринг клипов для ролика #{u_idx+1}...")
+                        status_box.text(f"⚡ Рендеринг клипов без рекламы для ролика #{u_idx+1}...")
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             futures = [executor.submit(render_clip, i) for i in range(clips_count)]
                             for future in concurrent.futures.as_completed(futures):
@@ -470,12 +488,12 @@ with col_center:
                             os.remove(input_filename)
 
                     except Exception as e:
-                        st.error(f"❌ Ошибка обработки ролика #{u_idx+1}: {e}")
+                        st.error(f"❌ Ошибка рендеринга ролика #{u_idx+1}: {e}")
 
             if local_banner_path and os.path.exists(local_banner_path):
                 os.remove(local_banner_path)
 
-            status_box.text("✅ Авто-пилот успешно завершил работу!")
+            status_box.text("✅ Готово! Все клипы успешно нарезаны.")
             st.success(t["success"])
             st.session_state['generated_clips'] = all_generated_clips
 
@@ -506,15 +524,15 @@ with col_right:
         st.checkbox("Speed Ramp (+4%)")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 6. НИЖНЯЯ СЕТКА И АРХИВ ---
+# --- 6. НИЖНЯЯ СЕТКА И АРХИВ (ОТОБРАЖЕНИЕ ГОТОВЫХ КЛИПОВ) ---
 if 'generated_clips' in st.session_state and st.session_state['generated_clips']:
     st.markdown("---")
     
     col_res_title, col_zip_btn = st.columns([3, 1])
     with col_res_title:
-        st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
+        st.markdown("### 🎬 СКАЧАТЬ НАРЕЗАННЫЕ ВИДЕО И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "autopilot_shorts.zip"
+        zip_filename = "ultimate_shorts_pack.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -525,7 +543,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="autopilot_pack.zip",
+                    file_name="ultimate_shorts_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -541,16 +559,16 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_auto_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_ultimate_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
                     with open(filepath, "rb") as f:
                         st.download_button(
-                            label=f"📥 Скачать #{global_idx+1}",
+                            label=f"📥 Скачать клип #{global_idx+1}",
                             data=f,
-                            file_name=f"autopilot_short_{global_idx+1}.mp4",
+                            file_name=f"short_clip_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_auto_{global_idx}"
+                            key=f"dl_btn_ultimate_{global_idx}"
                         )
