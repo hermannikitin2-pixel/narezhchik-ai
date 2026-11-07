@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v7.7 Final Master",
+    page_title="NAREZHCHIK AI v7.8 Fully Automated",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -102,7 +102,8 @@ def ensure_gameplay():
         dummy.close()
     return gameplay_path
 
-def download_video_with_cookies(video_url, output_filename):
+def download_video_from_url(video_url, output_filename):
+    """Автоматическая загрузка видео по ссылке с обходом блокировок через cookies.txt"""
     ydl_opts = {
         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
         'outtmpl': output_filename,
@@ -123,6 +124,7 @@ def download_video_with_cookies(video_url, output_filename):
         return False
 
 def make_pro_subtitle_clip(text, duration):
+    """Желтые плашки-субтитры по твоему образцу"""
     img_w, img_h = 1080, 160
     img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -154,28 +156,26 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'source_title': '⚡ АВТО-ПИЛОТ С ЗЕРКАЛИРОВАНИЕМ',
-        'warning': '🎯 **Защита от бана:** Видео автоматически зеркалится, реклама отрезается, субтитры на месте.',
-        'mode_label': 'РЕЖИМ РАБОТЫ',
-        'niche_preset': 'ВЫБОР КАТЕГОРИИ АВТОРОВ',
-        'file_label': 'ИЛИ ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
+        'source_title': '⚡ АВТОМАТИЧЕСКИЙ КОНВЕЙЕР ССЫЛОК',
+        'warning': '🎯 **Полный автопилот:** Вставь ссылки на длинные видео — софт сам скачает, отрежет рекламу и нарежет шортсы!',
+        'url_label': 'ССЫЛКИ НА YOUTUBE / TIKTOK (ПО 1 НА СТРОКУ)',
+        'file_label': 'РЕЗЕРВ: ЗАГРУЗИТЬ ФАЙЛЫ С ПК (.MP4)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
         'clip_duration': 'ДЛИТЕЛЬНОСТЬ (СЕК)',
-        'skip_ad_label': 'СТОП-КАМЕРА / ПРОПУСК РЕКЛАМЫ В НАЧАЛЕ (СЕК)',
+        'skip_ad_label': 'ПРОПУСК РЕКЛАМЫ В НАЧАЛЕ (СЕК)',
         'format_label': 'ФОРМАТ ВИДЕО (МАКЕТ 9:16)',
         'banner_label': '🛡️ ЗАГРУЗКА РЕКЛАМНОГО БАННЕРА / VPN-ФАЙЛА',
         'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
         'top_speaker': '👤 Верх: Видео блогера (Зеркало + 9:16)',
         'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ МАСТЕР-КОНВЕЙЕР',
+        'render_btn': '🚀 ЗАПУСТИТЬ АВТО-КОНВЕЙЕР',
         'success': '✅ Фабрика успешно завершила работу! Все клипы готовы ниже:',
     },
     'EN': {
-        'source_title': '⚡ AUTO-PILOT WITH FLIP',
-        'warning': '🎯 **Anti-Ban:** Video is auto-flipped, ads trimmed, yellow subtitles added.',
-        'mode_label': 'OPERATION MODE',
-        'niche_preset': 'CREATOR CATEGORY PRESET',
-        'file_label': 'OR UPLOAD FILES FROM PC (.MP4)',
+        'source_title': '⚡ AUTOMATED URL PIPELINE',
+        'warning': '🎯 **Full Autopilot:** Paste long video URLs — soft will download, trim ads and cut shorts!',
+        'url_label': 'YOUTUBE / TIKTOK URLS (ONE PER LINE)',
+        'file_label': 'BACKUP: UPLOAD FILES FROM PC (.MP4)',
         'clips_count': 'CLIPS PER VIDEO',
         'clip_duration': 'DURATION (SEC)',
         'skip_ad_label': 'SKIP AD AT START (SEC)',
@@ -184,7 +184,7 @@ i18n = {
         'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
         'top_speaker': '👤 Top: Creator Video (Flipped + 9:16)',
         'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START MASTER PIPELINE',
+        'render_btn': '🚀 START AUTO PIPELINE',
         'success': '✅ Pipeline completed! All clips ready below:',
     }
 }
@@ -200,7 +200,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.7 FINAL MASTER</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v7.8 AUTOMATED</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -219,48 +219,17 @@ with col_left:
     st.markdown(f'<div class="panel-title">{t["source_title"]}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="warning-box">{t["warning"]}</div>', unsafe_allow_html=True)
     
-    input_mode = st.radio(t["mode_label"], ["🎨 Готовая ниша (Аниматоры)", "📂 Свои файлы с ПК (.mp4)"])
-    
-    if "Готовая ниша" in input_mode:
-        preset_choice = st.selectbox(
-            t["niche_preset"],
-            [
-                "🎨 Аниматоры (Найс, Мармаж, Закатун, Добряк)",
-                "✂️ Стримеры / Реакции",
-                "🎙️ Подкасты и интервью",
-                "🎮 Игровые моменты"
-            ]
-        )
-        
-        # Надежные стабильные видео для базы
-        preset_videos = {
-            "🎨 Аниматоры (Найс, Мармаж, Закатун, Добряк)": [
-                "https://www.youtube.com/watch?v=2X_22qe8XRw",
-                "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            ],
-            "✂️ Стримеры / Реакции": [
-                "https://www.youtube.com/watch?v=2X_22qe8XRw"
-            ],
-            "🎙️ Подкасты и интервью": [
-                "https://www.youtube.com/watch?v=d_k8uQJtG_E"
-            ],
-            "🎮 Игровые моменты": [
-                "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            ]
-        }
-        selected_videos = preset_videos.get(preset_choice, [])
-    else:
-        uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
+    raw_urls = st.text_area(t["url_label"], placeholder="https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=...", height=90)
+    uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
     
     cl1, cl2 = st.columns(2)
     with cl1:
         clips_count = st.slider(t["clips_count"], 1, 5, 2)
     with cl2:
-        clip_duration = st.slider(t["clip_duration"], 15, 60, 20)
+        clip_duration = st.slider(t["clip_duration"], 15, 60, 25)
         
-    skip_ad_seconds = st.slider(t["skip_ad_label"], 0, 180, 20, help="Пропуск рекламных интеграций в начале ролика")
+    skip_ad_seconds = st.slider(t["skip_ad_label"], 0, 180, 40, help="Пропуск рекламы и интеграций в начале длинного видео")
 
-    # Переключатель зеркалирования видеоряда
     flip_video = st.checkbox("🔄 Зеркалировать видео автора (Flip по горизонтали)", value=True)
 
     layout_style = st.selectbox(
@@ -339,49 +308,46 @@ with col_center:
     st.write("")
     
     if st.button(t["render_btn"]):
-        gameplay_path = ensure_gameplay()
-
-        local_banner_path = None
-        if banner_file is not None:
-            local_banner_path = f"temp_banner_{int(time.time())}{os.path.splitext(banner_file.name)[1]}"
-            with open(local_banner_path, "wb") as f:
-                f.write(banner_file.getbuffer())
-
-        all_generated_clips = []
-        status_box = st.empty()
-        
-        videos_to_process = []
-        
-        if "Готовая ниша" in input_mode:
-            videos_to_process = selected_videos
+        urls = [u.strip() for u in raw_urls.split('\n') if u.strip()]
+        if not urls and not uploaded_videos:
+            st.error("❌ Вставьте ссылки на YouTube ИЛИ загрузите файлы с компьютера!")
         else:
+            gameplay_path = ensure_gameplay()
+
+            local_banner_path = None
+            if banner_file is not None:
+                local_banner_path = f"temp_banner_{int(time.time())}{os.path.splitext(banner_file.name)[1]}"
+                with open(local_banner_path, "wb") as f:
+                    f.write(banner_file.getbuffer())
+
+            all_generated_clips = []
+            status_box = st.empty()
+            
+            # Сбор всех источников (ссылки + файлы)
+            all_sources = []
+            for u in urls:
+                all_sources.append(("url", u))
             if uploaded_videos:
                 for uv in uploaded_videos:
                     f_name = f"uploaded_{int(time.time())}_{uv.name}"
                     with open(f_name, "wb") as f:
                         f.write(uv.getbuffer())
-                    videos_to_process.append(f_name)
+                    all_sources.append(("file", f_name))
 
-        if not videos_to_process:
-            st.error("❌ Загрузите файлы с компьютера или выберите нишу!")
-        else:
-            for u_idx, source_item in enumerate(videos_to_process):
+            for idx, (source_type, source_val) in enumerate(all_sources):
                 timestamp = int(time.time())
-                input_filename = f"input_vid_{u_idx}_{timestamp}.mp4"
+                input_filename = f"input_source_{idx}_{timestamp}.mp4"
                 
-                is_local = source_item.startswith("uploaded_") or os.path.exists(source_item)
-                
-                if is_local and source_item != input_filename:
-                    if os.path.exists(source_item):
-                        import shutil
-                        shutil.copy(source_item, input_filename)
-                else:
-                    status_box.text(f"⏳ Скачивание ролика #{u_idx+1}...")
-                    success = download_video_with_cookies(source_item, input_filename)
+                if source_type == "url":
+                    status_box.text(f"⏳ Авто-скачивание ссылки #{idx+1} на сервере...")
+                    success = download_video_from_url(source_val, input_filename)
                     if not success:
-                        # Резервный метод с ПК, если ссылка недоступна
-                        st.warning(f"⚠️ Ссылка #{u_idx+1} заблокирована. Загрузите файл через ПК-панель слева.")
+                        st.error(f"❌ Не удалось скачать ссылку #{idx+1}. Проверьте правильность URL.")
                         continue
+                else:
+                    if os.path.exists(source_val):
+                        import shutil
+                        shutil.copy(source_val, input_filename)
 
                 if os.path.exists(input_filename):
                     try:
@@ -396,13 +362,13 @@ with col_center:
                         def render_clip(i):
                             start_t = start_offset + (i * step)
                             end_t = min(start_t + clip_duration, total_duration)
-                            clip_filename = f"master_flip_{u_idx}_{timestamp}_{i+1}.mp4"
+                            clip_filename = f"auto_clip_{idx}_{timestamp}_{i+1}.mp4"
                             
                             main_clip = base_video.subclipped(start_t, end_t)
                             
-                            # Зеркалирование видеоряда (горизонтальный flip) для уникализации
+                            # Безопасное горизонтальное зеркалирование через numpy
                             if flip_video:
-                                main_clip = main_clip.fx(vfx.mirror_x) if hasattr(vfx, 'mirror_x') else main_clip.fl_image(lambda img: np.fliplr(img))
+                                main_clip = main_clip.fl_image(lambda img: np.fliplr(img))
 
                             w, h = main_clip.size
                             target_w, target_h = 1080, 960
@@ -467,10 +433,10 @@ with col_center:
                                 "🎬 Реакции / Развлекательный контент": "#shorts #funny #reaction #viral #trending"
                             }
                             niche_tags = tags_dict.get(niche_choice, "#shorts #viral #fyp")
-                            viral_text = f"🔥 Клип #{u_idx+1}_{i+1} {niche_tags}"
-                            return (f"Ролик #{u_idx+1} | Клип #{i+1}", clip_filename, viral_text)
+                            viral_text = f"🔥 Клип #{idx+1}_{i+1} {niche_tags}"
+                            return (f"Источник #{idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                        status_box.text(f"⚡ Рендеринг и зеркалирование ролика #{u_idx+1}...")
+                        status_box.text(f"⚡ Рендеринг и нарезка источника #{idx+1}...")
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             futures = [executor.submit(render_clip, i) for i in range(clips_count)]
                             for future in concurrent.futures.as_completed(futures):
@@ -481,7 +447,7 @@ with col_center:
                             os.remove(input_filename)
 
                     except Exception as e:
-                        st.error(f"❌ Ошибка рендеринга: {e}")
+                        st.error(f"❌ Ошибка рендеринга источника #{idx+1}: {e}")
 
             if local_banner_path and os.path.exists(local_banner_path):
                 os.remove(local_banner_path)
@@ -525,7 +491,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "final_master_pack.zip"
+        zip_filename = "automated_shorts_pack.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -536,7 +502,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="final_master_pack.zip",
+                    file_name="automated_shorts_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -552,7 +518,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_final_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_auto_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -560,8 +526,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"flipped_short_{global_idx+1}.mp4",
+                            file_name=f"automated_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_final_{global_idx}"
+                            key=f"dl_btn_auto_{global_idx}"
                         )
