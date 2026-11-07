@@ -12,7 +12,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v8.0 Bulletproof Factory",
+    page_title="NAREZHCHIK AI v8.1 Ironclad Master",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -103,7 +103,6 @@ def ensure_gameplay():
     return gameplay_path
 
 def download_video_bulletproof(video_url, output_filename):
-    """Максимально надежное скачивание без сбоев дата-центров"""
     ydl_opts = {
         'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]',
         'outtmpl': output_filename,
@@ -120,11 +119,11 @@ def download_video_bulletproof(video_url, output_filename):
             ydl.download([video_url])
         return os.path.exists(output_filename)
     except Exception as e:
-        print(f"Bulletproof Download error: {e}")
+        print(f"Download error: {e}")
         return False
 
 def make_pro_subtitle_clip(text, duration):
-    """Фирменные желтые плашки-субтитры по твоему образцу"""
+    """Желтые плашки-субтитры с черным текстом по центру"""
     img_w, img_h = 1080, 160
     img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -156,8 +155,8 @@ if 'lang' not in st.session_state:
 
 i18n = {
     'RU': {
-        'source_title': '⚡ АВТО-ПИЛОТ БУСТЕР ФАБРИКА',
-        'warning': '🎯 **Конвейер без сбоев:** Выбери нишу — софт мгновенно заберет видео из базы, отрежет рекламу и нарежет клипы!',
+        'source_title': '⚡ АВТО-ПИЛОТ ФАБРИКА (v8.1 MASTER)',
+        'warning': '🎯 Выбери нишу — фабрика автоматически скачает видео, отрежет рекламу и сгенерирует клипы!',
         'mode_label': 'РЕЖИМ РАБОТЫ',
         'niche_preset': 'ВЫБОР КАТЕГОРИИ АВТОРОВ',
         'file_label': 'ИЛИ ЗАГРУЗИТЬ СВОИ ФАЙЛЫ (.MP4)',
@@ -173,8 +172,8 @@ i18n = {
         'success': '✅ Фабрика успешно завершила работу! Все клипы готовы ниже:',
     },
     'EN': {
-        'source_title': '⚡ AUTO-PILOT BOOSTER FACTORY',
-        'warning': '🎯 **Seamless Pipeline:** Select niche — soft will instantly fetch from base, crop ads & make clips!',
+        'source_title': '⚡ AUTO-PILOT FACTORY (v8.1 MASTER)',
+        'warning': '🎯 Select niche — factory will download video, skip ads & produce clips automatically!',
         'mode_label': 'OPERATION MODE',
         'niche_preset': 'CREATOR CATEGORY PRESET',
         'file_label': 'OR UPLOAD FILES FROM PC (.MP4)',
@@ -202,7 +201,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v8.0 BULLETPROOF</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v8.1 IRONCLAD</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -223,7 +222,6 @@ with col_left:
     
     input_mode = st.radio(t["mode_label"], ["🎨 Авто-Пилот (База Ниш)", "📂 Свои файлы с ПК (.mp4)"])
     
-    # ПРОВЕРЕННАЯ И СТАБИЛЬНАЯ БАЗА ВИДЕО ДЛЯ НИШ
     niche_video_database = {
         "🎨 Аниматоры (Найс, Мармаж, Закатун, Добряк)": [
             "https://www.youtube.com/watch?v=2X_22qe8XRw",
@@ -246,7 +244,7 @@ with col_left:
     if "Авто-Пилот" in input_mode:
         preset_choice = st.selectbox(t["niche_preset"], list(niche_video_database.keys()))
         selected_videos = niche_video_database[preset_choice]
-        st.info("🤖 **Авто-конвейер готов:** Нажми кнопку запуска, чтобы сгенерировать клипы!")
+        st.info("🤖 **Авто-пилот включен:** Нажми кнопку для запуска генерации!")
     else:
         uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
 
@@ -256,7 +254,7 @@ with col_left:
     with cl2:
         clip_duration = st.slider(t["clip_duration"], 15, 60, 25)
         
-    skip_ad_seconds = st.slider(t["skip_ad_label"], 0, 180, 30, help="Пропуск рекламных интеграций в начале видео")
+    skip_ad_seconds = st.slider(t["skip_ad_label"], 0, 180, 30, help="Пропуск рекламы в начале длинного видео")
 
     flip_video = st.checkbox("🔄 Зеркалировать видео автора (Flip по горизонтали)", value=True)
 
@@ -364,7 +362,7 @@ with col_center:
         else:
             for idx, src in enumerate(sources_to_process):
                 timestamp = int(time.time())
-                input_filename = f"input_bullet_{idx}_{timestamp}.mp4"
+                input_filename = f"input_iron_{idx}_{timestamp}.mp4"
                 
                 is_local = src.startswith("uploaded_") or os.path.exists(src)
                 
@@ -372,7 +370,7 @@ with col_center:
                     import shutil
                     shutil.copy(src, input_filename)
                 else:
-                    status_box.text(f"⏳ Скачивание видео #{idx+1} из базы ниши...")
+                    status_box.text(f"⏳ Скачивание видео #{idx+1} из базы...")
                     success = download_video_bulletproof(src, input_filename)
                     if not success:
                         st.warning(f"⚠️ Видео #{idx+1} временно недоступно.")
@@ -390,12 +388,16 @@ with col_center:
                         def render_clip(i):
                             start_t = start_offset + (i * step)
                             end_t = min(start_t + clip_duration, total_duration)
-                            clip_filename = f"bullet_clip_{idx}_{timestamp}_{i+1}.mp4"
+                            clip_filename = f"iron_clip_{idx}_{timestamp}_{i+1}.mp4"
                             
                             main_clip = base_video.subclipped(start_t, end_t)
                             
+                            # БЕЗОПАСНОЕ ЗЕРКАЛИРОВАНИЕ ДЛЯ ЛЮБОЙ ВЕРСИИ MOVIEPY
                             if flip_video:
-                                main_clip = main_clip.fl_image(lambda img: np.fliplr(img))
+                                if hasattr(main_clip, 'image_transform'):
+                                    main_clip = main_clip.image_transform(lambda img: np.fliplr(img))
+                                else:
+                                    main_clip = main_clip.transform(lambda get_frame, t: np.fliplr(get_frame(t)))
 
                             w, h = main_clip.size
                             target_w, target_h = 1080, 960
@@ -462,7 +464,7 @@ with col_center:
                             viral_text = f"🔥 Клип #{idx+1}_{i+1} {niche_tags}"
                             return (f"Ниша #{idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                        status_box.text(f"⚡ Рендеринг и нарезка видео #{idx+1}...")
+                        status_box.text(f"⚡ Рендеринг ролика #{idx+1}...")
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             futures = [executor.submit(render_clip, i) for i in range(clips_count)]
                             for future in concurrent.futures.as_completed(futures):
@@ -509,7 +511,7 @@ with col_right:
         st.checkbox("Speed Ramp (+4%)")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 6. НИЖНЯЯ СЕТКА ГОТОВЫХ КЛИПОВ И АРХИВ ---
+# --- 6. ОТОБРАЖЕНИЕ ГОТОВЫХ КЛИПОВ ВНИЗУ И АРХИВ ---
 if 'generated_clips' in st.session_state and st.session_state['generated_clips']:
     st.markdown("---")
     
@@ -517,7 +519,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "bulletproof_shorts_pack.zip"
+        zip_filename = "ironclad_shorts_pack.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -528,7 +530,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="bulletproof_shorts_pack.zip",
+                    file_name="ironclad_shorts_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -544,7 +546,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_bullet_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_iron_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -552,8 +554,8 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                         st.download_button(
                             label=f"📥 Скачать #{global_idx+1}",
                             data=f,
-                            file_name=f"bulletproof_short_{global_idx+1}.mp4",
+                            file_name=f"ironclad_short_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_bullet_{global_idx}"
+                            key=f"dl_btn_iron_{global_idx}"
                         )
