@@ -8,13 +8,13 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v8.9 Enterprise Bulletproof",
+    page_title="NAREZHCHIK AI v9.0 Final Enterprise",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. ADVANCED CYBERPUNK SAAS DESIGN SYSTEM ---
+# --- 2. CYBERPUNK SAAS DESIGN SYSTEM ---
 st.markdown("""
     <style>
     .stApp {
@@ -29,10 +29,6 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 20px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        transition: border 0.3s ease;
-    }
-    .panel-card:hover {
-        border-color: #4f46e5;
     }
     .panel-title {
         font-size: 13px;
@@ -90,7 +86,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SAFE MOVIEPY IMPORTS & WRAPPERS ---
+# --- 3. SAFE MOVIEPY HELPERS ---
 def ensure_gameplay():
     from moviepy.video.VideoClip import ColorClip
     gameplay_path = "gameplay.mp4"
@@ -136,85 +132,37 @@ def make_pro_subtitle_clip(text, duration):
         clip = clip.set_duration(duration)
         return clip.set_position(("center", 780))
 
-# --- 4. STATE MANAGEMENT & LOCALIZATION ---
-if 'lang' not in st.session_state:
-    st.session_state['lang'] = 'RU'
-
-i18n = {
-    'RU': {
-        'source_title': '⚡ ПЕРСОНАЛЬНЫЙ ВИДЕО-КОНВЕЙЕР (BULLETPROOF)',
-        'warning': '🎯 Загрузи файлы с ПК (.mp4), настрой длительность, стоп-камеру для рекламы, студийные FX и запусти рендеринг шортсов!',
-        'file_label': 'ЗАГРУЗИТЬ ВИДЕОФАЙЛЫ С ПК (.MP4)',
-        'clips_count': 'КЛИПОВ С 1 ВИДЕО',
-        'clip_duration': 'ДЛИТЕЛЬНОСТЬ КЛИПА (СЕК)',
-        'skip_ad_label': 'СТОП-КАМЕРА / ПРОПУСК РЕКЛАМЫ (СЕК)',
-        'format_label': 'ФОРМАТ ВИДЕО (МАКЕТ 9:16)',
-        'banner_label': '🛡️ ИНТЕГРАЦИЯ БАННЕРА / ОВЕРЛЕЯ',
-        'preview_title': '📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)',
-        'top_speaker': '👤 Верх: Видео блогера (Зеркало + 9:16)',
-        'bottom_gameplay': '🎮 Низ: Roblox Obby Parkour (Геймплей)',
-        'render_btn': '🚀 ЗАПУСТИТЬ МАСТЕР-КОНВЕЙЕР',
-        'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы ниже:',
-    },
-    'EN': {
-        'source_title': '⚡ PERSONAL VIDEO PIPELINE (BULLETPROOF)',
-        'warning': '🎯 Upload source files from PC (.mp4), adjust duration, stop-camera for ads, studio FX and start rendering shorts!',
-        'file_label': 'UPLOAD VIDEO FILES FROM PC (.MP4)',
-        'clips_count': 'CLIPS PER VIDEO',
-        'clip_duration': 'CLIP DURATION (SEC)',
-        'skip_ad_label': 'STOP-CAMERA / SKIP ADS (SEC)',
-        'format_label': 'VIDEO FORMAT (9:16 FRAME)',
-        'banner_label': '🛡️ BANNER / OVERLAY INTEGRATION',
-        'preview_title': '📱 LIVE PREVIEW CANVAS (9:16)',
-        'top_speaker': '👤 Top: Creator Video (Flipped + 9:16)',
-        'bottom_gameplay': '🎮 Bottom: Roblox Obby Parkour',
-        'render_btn': '🚀 START MASTER PIPELINE',
-        'success': '✅ Pipeline completed! All clips and archives ready below:',
-    }
-}
-
-t = i18n[st.session_state['lang']]
-
-# --- 5. TOP BRAND BAR ---
-col_logo, col_switcher = st.columns([6, 1])
-
-with col_logo:
-    st.markdown("""
-        <div style="display: flex; align-items: center; gap: 12px; padding: 6px 0;">
-            <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
-            <div>
-                <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v8.9 BULLETPROOF (600+)</span>
-            </div>
+# --- 4. TOP BRAND BAR ---
+st.markdown("""
+    <div style="display: flex; align-items: center; gap: 12px; padding: 6px 0; margin-bottom: 10px;">
+        <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
+        <div>
+            <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px; color: #fff;">NAREZHCHIK AI</span>
+            <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v9.0 ENTERPRISE</span>
         </div>
-    """, unsafe_allow_html=True)
+    </div>
+""", unsafe_allow_html=True)
 
-with col_switcher:
-    lang_choice = st.selectbox("Lang", ["RU", "EN"], index=0 if st.session_state['lang']=='RU' else 1, label_visibility="collapsed")
-    if lang_choice != st.session_state['lang']:
-        st.session_state['lang'] = lang_choice
-        st.rerun()
-
-# --- 6. MAIN LAYOUT ARCHITECTURE ---
+# --- 5. MAIN LAYOUT ARCHITECTURE ---
 col_left, col_center, col_right = st.columns([1.1, 1.4, 1.1])
 
 with col_left:
-    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">{t["source_title"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="warning-box">{t["warning"]}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">⚡ АВТОМАТИЧЕСКИЙ КОНВЕЙЕР</div>', unsafe_allow_html=True)
+    st.markdown('<div class="warning-box">🎯 Загрузи исходные видео с ПК (.mp4), настрой длительность, стоп-камеру и запусти рендеринг!</div>', unsafe_allow_html=True)
     
-    uploaded_videos = st.file_uploader(t["file_label"], type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
+    uploaded_videos = st.file_uploader("ЗАГРУЗИТЬ ВИДЕОФАЙЛЫ С ПК (.MP4)", type=["mp4", "mov", "mkv", "avi"], accept_multiple_files=True)
     
     cl1, cl2 = st.columns(2)
     with cl1:
-        clips_count = st.slider(t["clips_count"], 1, 5, 2)
+        clips_count = st.slider("КЛИПОВ С 1 ВИДЕО", 1, 5, 2)
     with cl2:
-        clip_duration = st.slider(t["clip_duration"], 15, 60, 25)
+        clip_duration = st.slider("ДЛИТЕЛЬНОСТЬ (СЕК)", 15, 60, 25)
         
-    skip_ad_seconds = st.slider(t["skip_ad_label"], 0, 180, 15, help="Пропуск рекламных вставок в начале видео")
+    skip_ad_seconds = st.slider("СТОП-КАМЕРА / ПРОПУСК РЕКЛАМЫ (СЕК)", 0, 180, 15, help="Пропуск рекламных вставок в начале видео")
 
     layout_style = st.selectbox(
-        t["format_label"], 
+        "ФОРМАТ ВИДЕО (МАКЕТ 9:16)", 
         [
             "🔥 Сплит-скрин 50/50 (Сверху блогер / Снизу Roblox Obby)", 
             "📱 Одиночный 9:16 (Классика)"
@@ -236,17 +184,17 @@ with col_left:
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">{t["banner_label"]}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">🛡️ РЕКЛАМНЫЙ БАННЕР</div>', unsafe_allow_html=True)
     banner_file = st.file_uploader("Загрузите рекламный ролик или баннер (.mp4 / .png / .jpg)", type=["mp4", "png", "jpg", "jpeg"])
-    banner_mode = st.selectbox("Режим интеграции баннера", ["🚫 Без баннера", "🛑 Пауза-стоп", "📺 Плавающий оверлей"], index=0)
+    banner_mode = st.selectbox("Режим интеграции баннера", ["🚫 Без баннера", "🛑 Пауза-стоп"], index=0)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_center:
-    st.markdown(f'<div class="panel-card" style="text-align: center;">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title" style="justify-content: center;">{t["preview_title"]}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card" style="text-align: center;">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title" style="justify-content: center;">📱 ЖИВОЙ ПРЕВЬЮ-ХОЛСТ (9:16)</div>', unsafe_allow_html=True)
     
-    st.markdown(f"""
+    st.markdown("""
         <div style="
             width: 100%;
             height: 440px;
@@ -260,10 +208,10 @@ with col_center:
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         ">
             <div style="flex: 1; background: #0f1423; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid #05060a;">
-                <span style="color: #64748b; font-size: 12px; font-weight: 600;">{t["top_speaker"]}</span>
+                <span style="color: #64748b; font-size: 12px; font-weight: 600;">👤 Верх: Видео блогера (Зеркало + 9:16)</span>
             </div>
             <div style="flex: 1; background: #090d19; display: flex; align-items: center; justify-content: center;">
-                <span style="color: #38bdf8; font-size: 12px; font-weight: 600;">{t["bottom_gameplay"]}</span>
+                <span style="color: #38bdf8; font-size: 12px; font-weight: 600;">🎮 Низ: Roblox Obby Parkour (Геймплей)</span>
             </div>
             <div style="
                 position: absolute;
@@ -288,7 +236,7 @@ with col_center:
     
     st.write("")
     
-    if st.button(t["render_btn"]):
+    if st.button("🚀 ЗАПУСТИТЬ МАСТЕР-КОНВЕЙЕР"):
         if not uploaded_videos:
             st.error("❌ Сначала загрузите файлы .mp4 с компьютера в панели слева!")
         else:
@@ -305,7 +253,7 @@ with col_center:
 
             for idx, uv in enumerate(uploaded_videos):
                 timestamp = int(time.time())
-                input_filename = f"upload_bullet_{idx}_{timestamp}.mp4"
+                input_filename = f"upload_ent_{idx}_{timestamp}.mp4"
                 with open(input_filename, "wb") as f:
                     f.write(uv.getbuffer())
 
@@ -327,14 +275,13 @@ with col_center:
                         def render_clip(i):
                             start_t = start_offset + (i * step)
                             end_t = min(start_t + clip_duration, total_duration)
-                            clip_filename = f"bullet_clip_{idx}_{timestamp}_{i+1}.mp4"
+                            clip_filename = f"enterprise_clip_{idx}_{timestamp}_{i+1}.mp4"
                             
                             try:
                                 main_clip = base_video.subclipped(start_t, end_t)
                             except AttributeError:
                                 main_clip = base_video.subclip(start_t, end_t)
                             
-                            # Безопасное зеркалирование кадров
                             if flip_enabled:
                                 try:
                                     if hasattr(main_clip, 'image_transform'):
@@ -467,27 +414,27 @@ with col_center:
                 os.remove(local_banner_path)
 
             status_box.text("✅ Фабрика успешно завершила работу!")
-            st.success(t["success"])
+            st.success("✅ Фабрика успешно завершила работу! Все клипы и архивы готовы ниже:")
             st.session_state['generated_clips'] = all_generated_clips
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">🛡️ АНТИ-БАН И СУБТИТРЫ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">🛡️ АНТИ-БАН И СУБТИТРЫ</div>', unsafe_allow_html=True)
     st.checkbox("🔥 Авто-уникализация потока", value=True)
     st.checkbox("💬 Желтые субтитры-плашки", value=True, key="toggle_subs")
     st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">🚀 АЛГОРИТМЫ И ПРОСМОТРЫ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">🚀 АЛГОРИТМЫ И ПРОСМОТРЫ</div>', unsafe_allow_html=True)
     st.markdown('<div class="algo-box"><b>💡 Секрет удержания:</b> Первые 2 секунды решают всё. Нарезай самые эмоциональные моменты.</div>', unsafe_allow_html=True)
     st.markdown('<div class="algo-box"><b>📈 Как набрать 10k+:</b> Заливай от 3 до 5 роликов в день. Алгоритмам нужно время обучиться.</div>', unsafe_allow_html=True)
     st.markdown('<div class="algo-box"><b>🔥 Теги и заголовки:</b> Не пиши "Нарезка №1". Используйте интригующие фразы из ролика.</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown(f'<div class="panel-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="panel-title">✨ СТУДИЙНЫЕ FX</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title">✨ СТУДИЙНЫЕ FX</div>', unsafe_allow_html=True)
     fx1, fx2 = st.columns(2)
     with fx1:
         st.checkbox("Flip (Зеркало)", value=True, key="fx_flip")
@@ -497,7 +444,7 @@ with col_right:
         st.checkbox("Speed Ramp (+4%)")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 8. BOTTOM GRID & ARCHIVE DOWNLOAD ---
+# --- 6. BOTTOM GRID & ARCHIVE DOWNLOAD ---
 if 'generated_clips' in st.session_state and st.session_state['generated_clips']:
     st.markdown("---")
     
@@ -505,7 +452,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "bulletproof_shorts_pack.zip"
+        zip_filename = "enterprise_shorts_pack.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -516,7 +463,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="bulletproof_shorts_pack.zip",
+                    file_name="enterprise_shorts_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -532,7 +479,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_bullet_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_ent_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -543,5 +490,5 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                             file_name=f"clip_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_bullet_{global_idx}"
+                            key=f"dl_btn_ent_{global_idx}"
                         )
