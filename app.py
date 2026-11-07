@@ -1,7 +1,4 @@
 import streamlit as st
-from moviepy.video.io.VideoFileClip import VideoFileClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from moviepy.video.VideoClip import ImageClip, ColorClip
 import os
 import time
 import zipfile
@@ -11,7 +8,7 @@ import numpy as np
 
 # --- 1. CONFIG & SYSTEM SETUP ---
 st.set_page_config(
-    page_title="NAREZHCHIK AI v8.8 Enterprise Master",
+    page_title="NAREZHCHIK AI v8.9 Enterprise Bulletproof",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -93,56 +90,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. BULLETPROOF MOVIEPY COMPATIBILITY WRAPPERS ---
-def safe_subclip(clip, start, end):
-    """Обертка совместимости для старых и новых версий MoviePy"""
-    try:
-        return clip.subclipped(start, end)
-    except AttributeError:
-        return clip.subclip(start, end)
-
-def safe_resize(clip, *args, **kwargs):
-    try:
-        return clip.resized(*args, **kwargs)
-    except AttributeError:
-        return clip.resize(*args, **kwargs)
-
-def safe_crop(clip, *args, **kwargs):
-    try:
-        return clip.cropped(*args, **kwargs)
-    except AttributeError:
-        return clip.crop(*args, **kwargs)
-
-def safe_set_pos(clip, pos):
-    try:
-        return clip.with_position(pos)
-    except AttributeError:
-        return clip.set_position(pos)
-
-def safe_set_dur(clip, dur):
-    try:
-        return clip.with_duration(dur)
-    except AttributeError:
-        return clip.set_duration(dur)
-
-def safe_set_audio(clip, audio):
-    try:
-        return clip.with_audio(audio)
-    except AttributeError:
-        return clip.set_audio(audio)
-
-# --- 4. CORE ASSETS & GENERATORS ---
+# --- 3. SAFE MOVIEPY IMPORTS & WRAPPERS ---
 def ensure_gameplay():
+    from moviepy.video.VideoClip import ColorClip
     gameplay_path = "gameplay.mp4"
     if not os.path.exists(gameplay_path):
         dummy = ColorClip(size=(1080, 960), color=(15, 20, 35))
-        dummy = safe_set_dur(dummy, 60)
+        try:
+            dummy = dummy.with_duration(60)
+        except AttributeError:
+            dummy = dummy.set_duration(60)
         dummy.write_videofile(gameplay_path, fps=24, codec="libx264", logger=None)
         dummy.close()
     return gameplay_path
 
 def make_pro_subtitle_clip(text, duration):
-    """Генерация фирменных желтых плашек-субтитров по центру экрана"""
+    from moviepy.video.VideoClip import ImageClip
     img_w, img_h = 1080, 160
     img = Image.new("RGBA", (img_w, img_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -166,16 +129,20 @@ def make_pro_subtitle_clip(text, duration):
     draw.text((x0 + 25, y0 + 12), text, font=font, fill=(0, 0, 0, 255))
     
     clip = ImageClip(np.array(img))
-    clip = safe_set_dur(clip, duration)
-    return safe_set_pos(clip, ("center", 780))
+    try:
+        clip = clip.with_duration(duration)
+        return clip.with_position(("center", 780))
+    except AttributeError:
+        clip = clip.set_duration(duration)
+        return clip.set_position(("center", 780))
 
-# --- 5. LOCALIZATION & STATE MANAGEMENT ---
+# --- 4. STATE MANAGEMENT & LOCALIZATION ---
 if 'lang' not in st.session_state:
     st.session_state['lang'] = 'RU'
 
 i18n = {
     'RU': {
-        'source_title': '⚡ ПЕРСОНАЛЬНЫЙ ВИДЕО-КОНВЕЙЕР (ENTERPRISE)',
+        'source_title': '⚡ ПЕРСОНАЛЬНЫЙ ВИДЕО-КОНВЕЙЕР (BULLETPROOF)',
         'warning': '🎯 Загрузи файлы с ПК (.mp4), настрой длительность, стоп-камеру для рекламы, студийные FX и запусти рендеринг шортсов!',
         'file_label': 'ЗАГРУЗИТЬ ВИДЕОФАЙЛЫ С ПК (.MP4)',
         'clips_count': 'КЛИПОВ С 1 ВИДЕО',
@@ -190,7 +157,7 @@ i18n = {
         'success': '✅ Фабрика успешно завершила работу! Все клипы и архивы готовы ниже:',
     },
     'EN': {
-        'source_title': '⚡ PERSONAL VIDEO PIPELINE (ENTERPRISE)',
+        'source_title': '⚡ PERSONAL VIDEO PIPELINE (BULLETPROOF)',
         'warning': '🎯 Upload source files from PC (.mp4), adjust duration, stop-camera for ads, studio FX and start rendering shorts!',
         'file_label': 'UPLOAD VIDEO FILES FROM PC (.MP4)',
         'clips_count': 'CLIPS PER VIDEO',
@@ -208,7 +175,7 @@ i18n = {
 
 t = i18n[st.session_state['lang']]
 
-# --- 6. TOP BRAND BAR ---
+# --- 5. TOP BRAND BAR ---
 col_logo, col_switcher = st.columns([6, 1])
 
 with col_logo:
@@ -217,7 +184,7 @@ with col_logo:
             <span style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 6px 12px; font-weight: 900; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 15px rgba(79,70,229,0.4);">⚡</span>
             <div>
                 <span style="font-size: 17px; font-weight: 900; letter-spacing: 1px;">NAREZHCHIK AI</span>
-                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v8.8 ENTERPRISE SUITE (600+)</span>
+                <span style="background: rgba(79, 70, 229, 0.2); color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px;">v8.9 BULLETPROOF (600+)</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -228,7 +195,7 @@ with col_switcher:
         st.session_state['lang'] = lang_choice
         st.rerun()
 
-# --- 7. MAIN LAYOUT ARCHITECTURE ---
+# --- 6. MAIN LAYOUT ARCHITECTURE ---
 col_left, col_center, col_right = st.columns([1.1, 1.4, 1.1])
 
 with col_left:
@@ -338,12 +305,15 @@ with col_center:
 
             for idx, uv in enumerate(uploaded_videos):
                 timestamp = int(time.time())
-                input_filename = f"upload_ent_{idx}_{timestamp}.mp4"
+                input_filename = f"upload_bullet_{idx}_{timestamp}.mp4"
                 with open(input_filename, "wb") as f:
                     f.write(uv.getbuffer())
 
                 if os.path.exists(input_filename):
                     try:
+                        from moviepy.video.io.VideoFileClip import VideoFileClip
+                        from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+
                         base_video = VideoFileClip(input_filename)
                         total_duration = base_video.duration
                         
@@ -357,11 +327,14 @@ with col_center:
                         def render_clip(i):
                             start_t = start_offset + (i * step)
                             end_t = min(start_t + clip_duration, total_duration)
-                            clip_filename = f"enterprise_clip_{idx}_{timestamp}_{i+1}.mp4"
+                            clip_filename = f"bullet_clip_{idx}_{timestamp}_{i+1}.mp4"
                             
-                            main_clip = safe_subclip(base_video, start_t, end_t)
+                            try:
+                                main_clip = base_video.subclipped(start_t, end_t)
+                            except AttributeError:
+                                main_clip = base_video.subclip(start_t, end_t)
                             
-                            # Безопасное горизонтальное зеркалирование кадров
+                            # Безопасное зеркалирование кадров
                             if flip_enabled:
                                 try:
                                     if hasattr(main_clip, 'image_transform'):
@@ -375,38 +348,69 @@ with col_center:
                             target_w, target_h = 1080, 960
                             
                             scale_factor = max(target_w / w, target_h / h)
-                            main_clip = safe_resize(main_clip, scale_factor)
+                            try:
+                                main_clip = main_clip.resized(scale_factor)
+                            except AttributeError:
+                                main_clip = main_clip.resize(scale_factor)
+
                             mw, mh = main_clip.size
-                            main_clip = safe_set_pos(safe_crop(main_clip, x_center=mw/2, y_center=mh/2, width=target_w, height=target_h), ("center", "top"))
+                            try:
+                                main_clip = main_clip.cropped(x_center=mw/2, y_center=mh/2, width=target_w, height=target_h).with_position(("center", "top"))
+                            except AttributeError:
+                                main_clip = main_clip.crop(x_center=mw/2, y_center=mh/2, width=target_w, height=target_h).set_position(("center", "top"))
                             
                             clips_to_composite = [main_clip]
                             
                             if local_banner_path and os.path.exists(local_banner_path) and banner_mode != "🚫 Без баннера":
                                 banner_clip = VideoFileClip(local_banner_path)
-                                banner_clip = safe_set_audio(banner_clip, None)
-                                banner_clip = safe_subclip(banner_clip, 0, min(3, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration))
+                                try:
+                                    banner_clip = banner_clip.with_audio(None)
+                                    banner_clip = banner_clip.subclipped(0, min(3, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration))
+                                except AttributeError:
+                                    banner_clip = banner_clip.set_audio(None)
+                                    banner_clip = banner_clip.subclip(0, min(3, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration))
+                                
                                 bw, bh = banner_clip.size
                                 b_scale = max(target_w / bw, target_h / bh)
-                                banner_clip = safe_resize(banner_clip, b_scale)
-                                banner_clip = safe_set_pos(safe_crop(banner_clip, x_center=banner_clip.w/2, y_center=banner_clip.h/2, width=target_w, height=target_h), ("center", "center"))
+                                try:
+                                    banner_clip = banner_clip.resized(b_scale)
+                                    banner_clip = banner_clip.cropped(x_center=banner_clip.w/2, y_center=banner_clip.h/2, width=target_w, height=target_h).with_position(("center", "center"))
+                                except AttributeError:
+                                    banner_clip = banner_clip.resize(b_scale)
+                                    banner_clip = banner_clip.crop(x_center=banner_clip.w/2, y_center=banner_clip.h/2, width=target_w, height=target_h).set_position(("center", "center"))
+                                
                                 clips_to_composite.append(banner_clip)
 
                             if "Сплит-скрин" in layout_style and os.path.exists(gameplay_path):
                                 gameplay_clip = VideoFileClip(gameplay_path)
-                                gameplay_clip = safe_subclip(gameplay_clip, 0, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration)
-                                gameplay_clip = safe_set_audio(gameplay_clip, None)
+                                try:
+                                    gameplay_clip = gameplay_clip.subclipped(0, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration).with_audio(None)
+                                except AttributeError:
+                                    gameplay_clip = gameplay_clip.subclip(0, main_clip.duration if hasattr(main_clip, 'duration') else clip_duration).set_audio(None)
+                                
                                 gw, gh = gameplay_clip.size
                                 g_scale = max(target_w / gw, target_h / gh)
-                                gameplay_clip = safe_resize(gameplay_clip, g_scale)
-                                gw_cur, gh_cur = gameplay_clip.size
-                                gameplay_clip = safe_set_pos(safe_crop(gameplay_clip, x_center=gw_cur/2, y_center=gh_cur/2, width=target_w, height=target_h), ("center", "bottom"))
+                                try:
+                                    gameplay_clip = gameplay_clip.resized(g_scale)
+                                    gw_cur, gh_cur = gameplay_clip.size
+                                    gameplay_clip = gameplay_clip.cropped(x_center=gw_cur/2, y_center=gh_cur/2, width=target_w, height=target_h).with_position(("center", "bottom"))
+                                except AttributeError:
+                                    gameplay_clip = gameplay_clip.resize(g_scale)
+                                    gw_cur, gh_cur = gameplay_clip.size
+                                    gameplay_clip = gameplay_clip.crop(x_center=gw_cur/2, y_center=gh_cur/2, width=target_w, height=target_h).set_position(("center", "bottom"))
+                                
                                 clips_to_composite.append(gameplay_clip)
                                 final_subclip = CompositeVideoClip(clips_to_composite, size=(1080, 1920))
                             else:
                                 full_scale = max(1080 / w, 1920 / h)
-                                main_full = safe_resize(main_clip, full_scale)
-                                fw, fh = main_full.size
-                                final_subclip = safe_crop(main_full, x_center=fw/2, y_center=fh/2, width=1080, height=1920)
+                                try:
+                                    main_full = main_clip.resized(full_scale)
+                                    fw, fh = main_full.size
+                                    final_subclip = main_full.cropped(x_center=fw/2, y_center=fh/2, width=1080, height=1920)
+                                except AttributeError:
+                                    main_full = main_clip.resize(full_scale)
+                                    fw, fh = main_full.size
+                                    final_subclip = main_full.crop(x_center=fw/2, y_center=fh/2, width=1080, height=1920)
 
                             if use_subs:
                                 sub_texts = [
@@ -416,13 +420,14 @@ with col_center:
                                     "эпичный момент"
                                 ]
                                 caption = sub_texts[i % len(sub_texts)]
-                                sub_clip = make_pro_subtitle_clip(caption, final_subclip.duration if hasattr(final_subclip, 'duration') else clip_duration)
+                                dur_val = final_subclip.duration if hasattr(final_subclip, 'duration') else clip_duration
+                                sub_clip = make_pro_subtitle_clip(caption, dur_val)
                                 final_subclip = CompositeVideoClip([final_subclip, sub_clip], size=(1080, 1920))
 
                             if base_video.audio is not None:
                                 try:
-                                    audio_sub = safe_subclip(base_video.audio, start_t, end_t)
-                                    final_subclip = safe_set_audio(final_subclip, audio_sub)
+                                    audio_sub = base_video.audio.subclipped(start_t, end_t) if hasattr(base_video.audio, 'subclipped') else base_video.audio.subclip(start_t, end_t)
+                                    final_subclip = final_subclip.with_audio(audio_sub) if hasattr(final_subclip, 'with_audio') else final_subclip.set_audio(audio_sub)
                                 except Exception:
                                     pass
                                 
@@ -445,7 +450,7 @@ with col_center:
                             viral_text = f"🔥 Клип #{idx+1}_{i+1} {niche_tags}"
                             return (f"Файл #{idx+1} | Клип #{i+1}", clip_filename, viral_text)
 
-                        status_box.text(f"⚡ Рендеринг файла #{idx+1} через конвейер...")
+                        status_box.text(f"⚡ Рендеринг файла #{idx+1}...")
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             futures = [executor.submit(render_clip, i) for i in range(clips_count)]
                             for future in concurrent.futures.as_completed(futures):
@@ -500,7 +505,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
     with col_res_title:
         st.markdown("### 🎬 ГОТОВЫЕ КЛИПЫ И АВТО-ТЕКСТЫ")
     with col_zip_btn:
-        zip_filename = "enterprise_shorts_pack.zip"
+        zip_filename = "bulletproof_shorts_pack.zip"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for _, filepath, _ in st.session_state['generated_clips']:
                 if os.path.exists(filepath):
@@ -511,7 +516,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                 st.download_button(
                     label="📦 Скачать всё архивом (.zip)",
                     data=zf,
-                    file_name="enterprise_shorts_pack.zip",
+                    file_name="bulletproof_shorts_pack.zip",
                     mime="application/zip",
                     use_container_width=True
                 )
@@ -527,7 +532,7 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
             global_idx = i + idx
             with cols[idx]:
                 st.markdown(f"<div style='font-weight:700; color:#38bdf8; margin-bottom:4px; font-size:12px;'>{title}</div>", unsafe_allow_html=True)
-                st.text_input("Текст для поста", value=viral_text, key=f"text_ent_{global_idx}", label_visibility="collapsed")
+                st.text_input("Текст для поста", value=viral_text, key=f"text_bullet_{global_idx}", label_visibility="collapsed")
                 
                 if os.path.exists(filepath):
                     st.video(filepath)
@@ -538,5 +543,5 @@ if 'generated_clips' in st.session_state and st.session_state['generated_clips']
                             file_name=f"clip_{global_idx+1}.mp4",
                             mime="video/mp4",
                             use_container_width=True,
-                            key=f"dl_btn_ent_{global_idx}"
+                            key=f"dl_btn_bullet_{global_idx}"
                         )
